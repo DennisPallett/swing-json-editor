@@ -1,0 +1,19 @@
+target/
+.classpath
+.env
+.project
+.settings
+run.sh
+*.iml
+.idea
+.vscode/
+.run
+developer.properties
+test/results/*
+
+# Private keys
+*.aes
+
+# Ignore all plaintext env file except for local.env
+*.env
+!**/local.env
