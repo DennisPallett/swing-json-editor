@@ -121,7 +121,7 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <mainClass>nl.pallett.SwingJsonEditorApp</mainClass>
+          <mainClass>nl.pallett.jsoneditor.SwingJsonEditorApp</mainClass>
         </configuration>
       </plugin>
   </plugins>

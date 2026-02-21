@@ -1,0 +1,28 @@
+.json-key {
+    -fx-fill: #9CDCFE;   /* light blue */
+    -fx-font-weight: bold;
+}
+
+.json-string {
+    -fx-fill: #CE9178;
+}
+
+.json-number {
+    -fx-fill: #B5CEA8;
+}
+
+.json-boolean {
+    -fx-fill: #569CD6;
+}
+
+.json-null {
+    -fx-fill: #569CD6;
+}
+
+.json-brace, .json-bracket, .json-colon, .json-comma {
+    -fx-fill: #D4D4D4;
+}
+
+.json-error-line {
+    -fx-background-color: rgba(255,0,0,0.15);
+}

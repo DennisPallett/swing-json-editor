@@ -1,4 +1,4 @@
-package nl.pallett;
+package nl.pallett.jsoneditor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
@@ -10,17 +10,22 @@ import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 
 public class SwingJsonEditorApp extends Application {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final CodeArea codeArea = new CodeArea();
+    private TabPane tabPane = new TabPane();
+
+    private final EditorManager editorManager = new EditorManager();
 
     @Override
     public void start(Stage stage) {
 
         BorderPane root = new BorderPane();
+        root.setCenter(editorManager.getTabPane());
 
         // ---- Menu Bar ----
         MenuBar menuBar = new MenuBar();
@@ -40,7 +45,7 @@ public class SwingJsonEditorApp extends Application {
 
         // ---- Editor ----
         codeArea.setWrapText(true);
-        root.setCenter(codeArea);
+        //root.setCenter(codeArea);
 
         // ---- Actions ----
         openItem.setOnAction(e -> openFile(stage));
@@ -49,24 +54,46 @@ public class SwingJsonEditorApp extends Application {
         validateItem.setOnAction(e -> validateJson());
 
         Scene scene = new Scene(root, 800, 600);
+        scene.getStylesheets().add(
+                getClass().getResource("/json-editor.css").toExternalForm()
+        );
         stage.setTitle("Swing JSON Editor");
         stage.setScene(scene);
         stage.show();
     }
 
-    private void openFile(Stage stage) {
-        try {
-            FileChooser chooser = new FileChooser();
-            chooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("JSON Files", "*.json")
-            );
+    private void createNewTab(String title) {
+        TextArea textArea = new TextArea();
+        Tab tab = new Tab(title, textArea);
 
-            File file = chooser.showOpenDialog(stage);
-            if (file != null) {
-                codeArea.replaceText(Files.readString(file.toPath()));
+        tab.setClosable(true);
+
+        tabPane.getTabs().add(tab);
+        tabPane.getSelectionModel().select(tab);
+    }
+
+    private void openFile(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("JSON Files", "*.json")
+        );
+
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                String content = Files.readString(file.toPath());
+                editorManager.openDocument(file.toPath(), content);
+
+//                TextArea textArea = new TextArea(content);
+//                JsonFileTab tab = new JsonFileTab(file, content);
+//                tab.setClosable(true);
+//
+//                tabPane.getTabs().add(tab);
+//                tabPane.getSelectionModel().select(tab);
+
+            } catch (IOException ex) {
+                showError(ex);
             }
-        } catch (Exception ex) {
-            showError(ex);
         }
     }
 
