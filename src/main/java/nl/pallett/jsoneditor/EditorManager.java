@@ -5,6 +5,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -15,10 +17,18 @@ public class EditorManager {
     private TabPane tabPane = new TabPane();
     private Map<Tab, EditorDocument> openDocuments = new HashMap<>();
 
-    public void openDocument(Path path, String content) {
+    public EditorManager () {
+        tabPane.setTabMinWidth(80);
+        tabPane.setTabMaxWidth(160);
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
+    }
+
+    public void openDocument(@Nullable Path path, String content) {
         EditorDocument doc = new EditorDocument(path, content);
 
-        Tab tab = new Tab(path.getFileName().toString());
+        String tabTitle = (path != null) ? path.getFileName().toString() : "Untitled";
+
+        Tab tab = new Tab(tabTitle);
         tab.setContent(new VirtualizedScrollPane<>(doc.getEditor()));
         tab.setOnCloseRequest(event -> {
             if (doc.dirtyProperty().getValue()) {
@@ -35,16 +45,26 @@ public class EditorManager {
         openDocuments.put(tab, doc);
         tabPane.getTabs().add(tab);
 
+        tabPane.getSelectionModel().select(tab);
+
         doc.dirtyProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                tab.setText(path.getFileName() + "*");
+                tab.setText(tabTitle + "*");
             } else {
-                tab.setText(path.getFileName().toString());
+                tab.setText(tabTitle);
             }
         });
     }
 
     public TabPane getTabPane() {
         return tabPane;
+    }
+
+    public CodeArea getActiveEditor() {
+        return getActiveDocument().getEditor();
+    }
+
+    public EditorDocument getActiveDocument () {
+        return openDocuments.get(tabPane.getSelectionModel().getSelectedItem());
     }
 }

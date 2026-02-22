@@ -1,14 +1,14 @@
 .json-key {
-    -fx-fill: #9CDCFE;   /* light blue */
+    -fx-fill: #0509fa;   /* light blue */
     -fx-font-weight: bold;
 }
 
 .json-string {
-    -fx-fill: #CE9178;
+    -fx-fill: #ff8c00;
 }
 
 .json-number {
-    -fx-fill: #B5CEA8;
+    -fx-fill: #398500;
 }
 
 .json-boolean {
@@ -20,7 +20,7 @@
 }
 
 .json-brace, .json-bracket, .json-colon, .json-comma {
-    -fx-fill: #D4D4D4;
+    -fx-fill: #000000;
 }
 
 .json-error-line {
