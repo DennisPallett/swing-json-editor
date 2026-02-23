@@ -70,8 +70,10 @@ public class SwingJsonEditorApp extends Application {
         );
         scene.getStylesheets().add(
                 getClass().getResource("/style.css").toExternalForm()
-
-                );
+        );
+        scene.getStylesheets().add(
+                getClass().getResource("/json-tree.css").toExternalForm()
+        );
         stage.initStyle(StageStyle.DECORATED);
         stage.setTitle("Swing JSON Editor");
         stage.setScene(scene);

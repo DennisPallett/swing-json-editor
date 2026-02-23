@@ -1,0 +1,26 @@
+.tree-cell.json-object {
+    -fx-text-fill: #c586c0;
+    -fx-font-weight: bold;
+}
+
+.tree-cell.json-array {
+    -fx-text-fill: #569cd6;
+    -fx-font-weight: bold;
+}
+
+.tree-cell.json-string {
+    -fx-text-fill: #ce9178;
+}
+
+.tree-cell.json-number {
+    -fx-text-fill: #b5cea8;
+}
+
+.tree-cell.json-boolean {
+    -fx-text-fill: #569cd6;
+}
+
+.tree-cell.json-null {
+    -fx-text-fill: #808080;
+    -fx-font-style: italic;
+}

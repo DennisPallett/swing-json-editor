@@ -1,9 +1,6 @@
 package nl.pallett.jsoneditor;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.jspecify.annotations.Nullable;
@@ -29,7 +26,12 @@ public class EditorManager {
         String tabTitle = (path != null) ? path.getFileName().toString() : "Untitled";
 
         Tab tab = new Tab(tabTitle);
-        tab.setContent(new VirtualizedScrollPane<>(doc.getEditor()));
+        //tab.setContent(new VirtualizedScrollPane<>(doc.getEditor()));
+
+        SplitPane splitPane = new SplitPane();
+        splitPane.getItems().addAll(doc.getJsonTree(), doc.getEditor());
+        tab.setContent(splitPane);
+
         tab.setOnCloseRequest(event -> {
             if (doc.dirtyProperty().getValue()) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
