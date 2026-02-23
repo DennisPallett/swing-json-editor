@@ -1,22 +1,26 @@
 .json-key {
-    -fx-fill: #0509fa;   /* light blue */
+    -fx-fill: #328FAC;   /* light blue */
     -fx-font-weight: bold;
 }
 
 .json-string {
-    -fx-fill: #ff8c00;
+    -fx-fill: #B2762E;
+    -fx-font-weight: bold;
 }
 
 .json-number {
-    -fx-fill: #398500;
+    -fx-fill: #159943;
+    -fx-font-weight: bold;
 }
 
 .json-boolean {
-    -fx-fill: #569CD6;
+    -fx-fill: #676DFF;
+    -fx-font-weight: bold;
 }
 
 .json-null {
-    -fx-fill: #569CD6;
+    -fx-fill: #676DFF;
+    -fx-font-weight: bold;
 }
 
 .json-brace, .json-bracket, .json-colon, .json-comma {
