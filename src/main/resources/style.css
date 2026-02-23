@@ -18,3 +18,7 @@
 .tab-pane .tab-label {
     -fx-font-size: 12px;
 }
+
+.flash-line {
+    -fx-background-color: rgba(100, 149, 237, 0.25);  /* soft blue */
+}

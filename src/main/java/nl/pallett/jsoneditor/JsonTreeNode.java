@@ -9,14 +9,17 @@ public class JsonTreeNode {
     private final String key;
     private final String value;
     private final Type type;
+    private final String path;
 
-    public JsonTreeNode(String key, String value, Type type) {
+    public JsonTreeNode(String key, String value, Type type, String path) {
         this.key = key;
         this.value = value;
         this.type = type;
+        this.path = path;
     }
 
     public String getKey() { return key; }
     public String getValue() { return value; }
     public Type getType() { return type; }
+    public String getPath() { return path; }
 }

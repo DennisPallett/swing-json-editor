@@ -28,8 +28,11 @@ public class EditorManager {
         Tab tab = new Tab(tabTitle);
         //tab.setContent(new VirtualizedScrollPane<>(doc.getEditor()));
 
+        VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(doc.getEditor());
+        doc.setScrollPane(scrollPane);
+
         SplitPane splitPane = new SplitPane();
-        splitPane.getItems().addAll(doc.getJsonTree(), doc.getEditor());
+        splitPane.getItems().addAll(doc.getJsonTree(), scrollPane);
         tab.setContent(splitPane);
 
         tab.setOnCloseRequest(event -> {
