@@ -161,7 +161,6 @@ public class EditorDocument {
         }
 
         smoothScrollToOffset(searchStart);
-        //flashCurrentLine();
     }
 
     public void setDirtyChecksum(String content) {
