@@ -164,5 +164,5 @@ public class EditorDocument {
     public CodeArea getEditor() { return codeArea; }
     public BooleanProperty dirtyProperty() { return dirty; }
     public @Nullable Path getPath() { return path; }
-    public TreeView<JsonTreeNode> getJsonTree() { return jsonTree; }
+    public JsonTreeView getJsonTree() { return jsonTree; }
 }

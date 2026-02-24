@@ -11,6 +11,8 @@ import java.util.Set;
 public class JsonTreeView extends TreeView<JsonTreeNode> {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private TreeItem<JsonTreeNode> unfilteredFullRoot;
+
     public JsonTreeView(EditorDocument document) {
         super();
 
@@ -40,12 +42,51 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
                     buildTree(node, "root", "");
 
             setRoot(newRoot);
+            unfilteredFullRoot = getRoot();
 
             restoreExpandedPaths(newRoot, expanded);
 
         } catch (Exception ignored) {
             // invalid JSON
         }
+    }
+
+    public void filterOnValue(String value) {
+        if (value == null || value.isBlank()) {
+            setRoot(unfilteredFullRoot);
+        } else {
+            TreeItem<JsonTreeNode> filteredRoot =
+                    filterTree(unfilteredFullRoot, value.toLowerCase());
+            setRoot(filteredRoot);
+        }
+    }
+
+    private TreeItem<JsonTreeNode> filterTree(TreeItem<JsonTreeNode> source, String filter) {
+
+        if (source == null) return null;
+
+        TreeItem<JsonTreeNode> filteredItem = new TreeItem<>(source.getValue());
+
+        for (TreeItem<JsonTreeNode> child : source.getChildren()) {
+            TreeItem<JsonTreeNode> filteredChild = filterTree(child, filter);
+            if (filteredChild != null) {
+                filteredItem.getChildren().add(filteredChild);
+            }
+        }
+
+        // Keep item if:
+        // 1) It matches
+        // 2) Any child matches
+        String jsonKey = source.getValue().getKey();
+        String jsonValue = source.getValue().getValue();
+        if ((jsonKey != null && jsonKey.toLowerCase().contains(filter))
+                || (jsonValue != null && jsonValue.toLowerCase().contains(filter))
+                || !filteredItem.getChildren().isEmpty()) {
+            filteredItem.setExpanded(true); // auto-expand matches
+            return filteredItem;
+        }
+
+        return null;
     }
 
     private Set<String> captureExpandedPaths(TreeItem<JsonTreeNode> root) {

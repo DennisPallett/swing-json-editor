@@ -19,21 +19,13 @@ public class EditorTab extends Tab {
         VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(doc.getEditor());
 
         TextField filterField = new TextField();
-        var treeView = doc.getJsonTree();
+        JsonTreeView treeView = doc.getJsonTree();
         VBox container = new VBox();
         container.setSpacing(5); // space between text field and tree
 
-        var originalRoot = treeView.getRoot();
-
-        filterField.textProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue == null || newValue.isBlank()) {
-                treeView.setRoot(originalRoot);
-            } else {
-                TreeItem<JsonTreeNode> filteredRoot =
-                        filterTree(originalRoot, newValue.toLowerCase());
-                treeView.setRoot(filteredRoot);
-            }
-        });
+        filterField.textProperty().addListener(
+                (obs, oldValue, newValue) -> treeView.filterOnValue(newValue)
+        );
 
         container.getChildren().addAll(filterField, treeView);
 
@@ -69,31 +61,5 @@ public class EditorTab extends Tab {
         });
     }
 
-    private TreeItem<JsonTreeNode> filterTree(TreeItem<JsonTreeNode> source, String filter) {
 
-        if (source == null) return null;
-
-        TreeItem<JsonTreeNode> filteredItem = new TreeItem<>(source.getValue());
-
-        for (TreeItem<JsonTreeNode> child : source.getChildren()) {
-            TreeItem<JsonTreeNode> filteredChild = filterTree(child, filter);
-            if (filteredChild != null) {
-                filteredItem.getChildren().add(filteredChild);
-            }
-        }
-
-        // Keep item if:
-        // 1) It matches
-        // 2) Any child matches
-        String jsonKey = source.getValue().getKey();
-        String jsonValue = source.getValue().getValue();
-        if ((jsonKey != null && jsonKey.toLowerCase().contains(filter))
-                || (jsonValue != null && jsonValue.toLowerCase().contains(filter))
-                || !filteredItem.getChildren().isEmpty()) {
-            filteredItem.setExpanded(true); // auto-expand matches
-            return filteredItem;
-        }
-
-        return null;
-    }
 }
