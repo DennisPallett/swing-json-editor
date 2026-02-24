@@ -17,7 +17,6 @@ public class EditorTab extends Tab {
         setText(tabTitle);
 
         VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(doc.getEditor());
-        doc.setScrollPane(scrollPane);
 
         TextField filterField = new TextField();
         var treeView = doc.getJsonTree();

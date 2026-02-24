@@ -26,9 +26,7 @@ public class EditorDocument {
 
     private final PauseTransition debounce = new PauseTransition(Duration.millis(400));
 
-    private final TreeView<JsonTreeNode> jsonTree;
-
-    private final ObjectMapper objectMapper;
+    private final JsonTreeView jsonTree;
 
     private long dirtyChecksum;
     private Timeline scrollAnimation;
@@ -36,27 +34,14 @@ public class EditorDocument {
     private int lastFlashedParagraph = -1;
     private Timeline flashTimeline;
 
-    private VirtualizedScrollPane<CodeArea> scrollPane;
 
     public EditorDocument(@Nullable Path path, String content) {
         this.path = path;
         JsonCodeEditor editor = new JsonCodeEditor();
 
-        objectMapper = new ObjectMapper();
-
         this.codeArea = editor.getCodeArea();
 
-        jsonTree = new TreeView<>();
-        jsonTree.setShowRoot(false);
-        jsonTree.setCellFactory(tv -> new JsonTreeCell());
-
-        jsonTree.getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, oldItem, newItem) -> {
-                    if (newItem != null) {
-                        scrollToJsonPath(newItem.getValue());
-                    }
-                });
+        jsonTree = new JsonTreeView(this);
 
         debounce.setOnFinished(e -> handleJsonRefresh());
 
@@ -68,12 +53,11 @@ public class EditorDocument {
 
     private void init(String content) {
         codeArea.replaceText(content);
-        refreshJsonTree();
+        jsonTree.refreshJsonTree(content);
         setDirtyChecksum(content);
     }
 
     private void flashCurrentLine() {
-
         int paragraph = codeArea.getCurrentParagraph();
 
         // Clear previous flash immediately
@@ -99,10 +83,6 @@ public class EditorDocument {
                         })
         );
         flashTimeline.play();
-    }
-
-    public void setScrollPane(VirtualizedScrollPane<CodeArea> scrollPane) {
-        this.scrollPane = scrollPane;
     }
 
     private void smoothScrollToOffset(int targetOffset) {
@@ -140,7 +120,7 @@ public class EditorDocument {
         scrollAnimation.play();
     }
 
-    private void scrollToJsonPath(JsonTreeNode node) {
+    public void scrollToJsonPath(JsonTreeNode node) {
 
         String[] parts = node.getPath().split("\\.");
 
@@ -176,99 +156,10 @@ public class EditorDocument {
         long newChecksum = HashUtil.crc32(codeArea.getText());
         dirty.set(dirtyChecksum != newChecksum);
 
-        refreshJsonTree();
+        jsonTree.refreshJsonTree(codeArea.getText());
     }
 
-    private void refreshJsonTree() {
-        try {
-            Set<String> expanded = new HashSet<>();
 
-            if (jsonTree.getRoot() != null) {
-                expanded = captureExpandedPaths(jsonTree.getRoot());
-            }
-
-            JsonNode node = objectMapper.readTree(codeArea.getText());
-
-            TreeItem<JsonTreeNode> newRoot =
-                    buildTree(node, "root", "");
-
-            jsonTree.setRoot(newRoot);
-
-            restoreExpandedPaths(newRoot, expanded);
-
-        } catch (Exception ignored) {
-            // invalid JSON
-        }
-    }
-
-    private Set<String> captureExpandedPaths(TreeItem<JsonTreeNode> root) {
-        Set<String> expanded = new HashSet<>();
-        captureExpanded(root, expanded);
-        return expanded;
-    }
-
-    private void captureExpanded(TreeItem<JsonTreeNode> item, Set<String> expanded) {
-        if (item.isExpanded()) {
-            expanded.add(item.getValue().getPath());
-        }
-        for (TreeItem<JsonTreeNode> child : item.getChildren()) {
-            captureExpanded(child, expanded);
-        }
-    }
-
-    private void restoreExpandedPaths(TreeItem<JsonTreeNode> root, Set<String> expanded) {
-        restoreExpanded(root, expanded);
-    }
-
-    private void restoreExpanded(TreeItem<JsonTreeNode> item, Set<String> expanded) {
-        if (expanded.contains(item.getValue().getPath())) {
-            item.setExpanded(true);
-        }
-        for (TreeItem<JsonTreeNode> child : item.getChildren()) {
-            restoreExpanded(child, expanded);
-        }
-    }
-
-    private TreeItem<JsonTreeNode> buildTree(JsonNode node, String key, String path) {
-
-        String currentPath = path.isEmpty() ? key : path + "." + key;
-
-        JsonTreeNode.Type type;
-
-        if (node.isObject()) {
-            TreeItem<JsonTreeNode> item =
-                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.OBJECT, currentPath));
-
-            node.fieldNames().forEachRemaining(field ->
-                    item.getChildren().add(
-                            buildTree(node.get(field), field, currentPath)
-                    )
-            );
-            return item;
-        }
-
-        if (node.isArray()) {
-            TreeItem<JsonTreeNode> item =
-                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.ARRAY, currentPath));
-
-            for (int i = 0; i < node.size(); i++) {
-                item.getChildren().add(
-                        buildTree(node.get(i), "[" + i + "]", currentPath)
-                );
-            }
-            return item;
-        }
-
-        // value node
-        if (node.isTextual()) type = JsonTreeNode.Type.STRING;
-        else if (node.isNumber()) type = JsonTreeNode.Type.NUMBER;
-        else if (node.isBoolean()) type = JsonTreeNode.Type.BOOLEAN;
-        else type = JsonTreeNode.Type.NULL;
-
-        return new TreeItem<>(
-                new JsonTreeNode(key, node.asText(), type, currentPath)
-        );
-    }
 
     public CodeArea getEditor() { return codeArea; }
     public BooleanProperty dirtyProperty() { return dirty; }
