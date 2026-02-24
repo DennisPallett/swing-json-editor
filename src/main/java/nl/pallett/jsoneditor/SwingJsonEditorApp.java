@@ -11,7 +11,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +20,7 @@ import java.nio.file.Path;
 public class SwingJsonEditorApp extends Application {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    //private final CodeArea codeArea = new CodeArea();
+
     private TabPane tabPane = new TabPane();
 
     private final EditorManager editorManager = new EditorManager();
