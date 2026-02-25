@@ -110,7 +110,7 @@ public class SwingJsonEditorApp extends Application {
         }
 
         Path file = activeDocument.getPath();
-        String content = activeDocument.getEditor().getText();
+        String content = activeDocument.getJson();
 
         try {
             if (file != null) {
@@ -131,7 +131,7 @@ public class SwingJsonEditorApp extends Application {
             return;
         }
 
-        String content = activeDocument.getEditor().getText();
+        String content = activeDocument.getJson();
 
         try {
             FileChooser chooser = new FileChooser();

@@ -1,13 +1,18 @@
 package nl.pallett.jsoneditor;
 
+import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.animation.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import nl.pallett.jsoneditor.util.HashUtil;
+import org.controlsfx.control.StatusBar;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
@@ -22,6 +27,9 @@ public class EditorDocument {
 
     private @Nullable Path path;
     private final CodeArea codeArea;
+    private final StatusBar statusBar;
+    private final BorderPane containerPane;
+
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
 
     private final PauseTransition debounce = new PauseTransition(Duration.millis(400));
@@ -34,12 +42,23 @@ public class EditorDocument {
     private int lastFlashedParagraph = -1;
     private Timeline flashTimeline;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
 
     public EditorDocument(@Nullable Path path, String content) {
         this.path = path;
         JsonCodeEditor editor = new JsonCodeEditor();
 
         this.codeArea = editor.getCodeArea();
+        this.containerPane = new BorderPane();
+
+        this.statusBar = new StatusBar();
+        statusBar.setText("Ready");
+
+        VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(codeArea);
+
+        containerPane.setCenter(scrollPane);
+        containerPane.setBottom(statusBar);
 
         jsonTree = new JsonTreeView(this);
 
@@ -157,6 +176,26 @@ public class EditorDocument {
         dirty.set(dirtyChecksum != newChecksum);
 
         jsonTree.refreshJsonTree(codeArea.getText());
+
+        validateJson();
+    }
+
+    private void validateJson() {
+        try {
+            objectMapper.readTree(codeArea.getText());
+            statusBar.setText("✅ Valid JSON");
+            statusBar.setTooltip(null);
+        } catch (JsonProcessingException ex) {
+            String message = "❌ Invalid JSON";
+            JsonLocation errorLocation = ex.getLocation();
+            if (errorLocation != null) {
+                message += " at line " + errorLocation.getLineNr()
+                        + ", column " + errorLocation.getColumnNr();
+            }
+            
+            statusBar.setText(message);
+            statusBar.setTooltip(new Tooltip(ex.getMessage()));
+        }
     }
 
 
@@ -165,4 +204,11 @@ public class EditorDocument {
     public BooleanProperty dirtyProperty() { return dirty; }
     public @Nullable Path getPath() { return path; }
     public JsonTreeView getJsonTree() { return jsonTree; }
+    public String getJson() {
+        return codeArea.getText();
+    }
+
+    public Pane getContainer() {
+        return containerPane;
+    }
 }

@@ -1,8 +1,10 @@
 package nl.pallett.jsoneditor;
 
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import org.controlsfx.control.StatusBar;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.jspecify.annotations.Nullable;
@@ -16,18 +18,16 @@ public class EditorTab extends Tab {
         final String tabTitle = (path != null) ? path.getFileName().toString() : "Untitled";
         setText(tabTitle);
 
-        VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(doc.getEditor());
-
         TextField filterField = new TextField();
         JsonTreeView treeView = doc.getJsonTree();
-        VBox container = new VBox();
-        container.setSpacing(5); // space between text field and tree
+        VBox leftContainer = new VBox();
+        leftContainer.setSpacing(5); // space between text field and tree
 
         filterField.textProperty().addListener(
                 (obs, oldValue, newValue) -> treeView.filterOnValue(newValue)
         );
 
-        container.getChildren().addAll(filterField, treeView);
+        leftContainer.getChildren().addAll(filterField, treeView);
 
         // Make both take full width
         filterField.setMaxWidth(Double.MAX_VALUE);
@@ -37,7 +37,7 @@ public class EditorTab extends Tab {
         VBox.setVgrow(treeView, Priority.ALWAYS);
 
         SplitPane splitPane = new SplitPane();
-        splitPane.getItems().addAll(container, scrollPane);
+        splitPane.getItems().addAll(leftContainer, doc.getContainer());
         setContent(splitPane);
 
         setOnCloseRequest(event -> {
