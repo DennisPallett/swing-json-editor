@@ -1,22 +1,18 @@
 package nl.pallett.jsoneditor;
 
-import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.LineNumberFactory;
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
-
 import javafx.concurrent.Task;
 import javafx.scene.Node;
-import javafx.scene.layout.StackPane;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.fxmisc.richtext.model.TwoDimensional.Bias;
 
 public class JsonCodeEditor {
 
@@ -74,7 +70,7 @@ public class JsonCodeEditor {
     }
 
     // --- Async Highlighting ---
-    private void computeHighlightingAsync() {
+    public void computeHighlightingAsync() {
         String text = codeArea.getText();
 
         Task<StyleSpans<Collection<String>>> task = new Task<>() {

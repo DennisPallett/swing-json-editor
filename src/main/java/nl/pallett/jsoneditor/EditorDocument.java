@@ -2,12 +2,15 @@ package nl.pallett.jsoneditor;
 
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.animation.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.control.*;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
@@ -20,12 +23,13 @@ import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+
+import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
 
 public class EditorDocument {
 
     private @Nullable Path path;
+    private final JsonCodeEditor editor;
     private final CodeArea codeArea;
     private final StatusBar statusBar;
     private final BorderPane containerPane;
@@ -36,18 +40,22 @@ public class EditorDocument {
 
     private final JsonTreeView jsonTree;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     private long dirtyChecksum;
     private Timeline scrollAnimation;
 
     private int lastFlashedParagraph = -1;
     private Timeline flashTimeline;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-
     public EditorDocument(@Nullable Path path, String content) {
         this.path = path;
-        JsonCodeEditor editor = new JsonCodeEditor();
+        editor = new JsonCodeEditor();
+
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
+                .withArrayIndenter(new DefaultIndenter("    ", "\n"))   // 4 spaces + newline
+                .withObjectIndenter(new DefaultIndenter("    ", "\n"));
+        objectMapper.setDefaultPrettyPrinter(printer);
 
         this.codeArea = editor.getCodeArea();
         this.containerPane = new BorderPane();
@@ -180,6 +188,18 @@ public class EditorDocument {
         validateJson();
     }
 
+    public void formatJson() {
+        try {
+            Object json = objectMapper.readValue(codeArea.getText(), Object.class);
+            String formatted = objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(json);
+            codeArea.replaceText(formatted);
+            editor.computeHighlightingAsync();
+        } catch (Exception ex) {
+            showError(ex);
+        }
+    }
+
     private void validateJson() {
         try {
             objectMapper.readTree(codeArea.getText());
@@ -192,7 +212,7 @@ public class EditorDocument {
                 message += " at line " + errorLocation.getLineNr()
                         + ", column " + errorLocation.getColumnNr();
             }
-            
+
             statusBar.setText(message);
             statusBar.setTooltip(new Tooltip(ex.getMessage()));
         }
