@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,7 +31,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
 
     public void refreshJsonTree(String json) {
         try {
-            Set<String> expanded = new HashSet<>();
+            Set<JsonPath> expanded = new HashSet<>();
 
             if (getRoot() != null) {
                 expanded = captureExpandedPaths(getRoot());
@@ -39,7 +40,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
             JsonNode node = objectMapper.readTree(json);
 
             TreeItem<JsonTreeNode> newRoot =
-                    buildTree(node, "root", "");
+                    buildTree(node, "root", null);
 
             setRoot(newRoot);
             unfilteredFullRoot = getRoot();
@@ -89,13 +90,13 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         return null;
     }
 
-    private Set<String> captureExpandedPaths(TreeItem<JsonTreeNode> root) {
-        Set<String> expanded = new HashSet<>();
+    private Set<JsonPath> captureExpandedPaths(TreeItem<JsonTreeNode> root) {
+        Set<JsonPath> expanded = new HashSet<>();
         captureExpanded(root, expanded);
         return expanded;
     }
 
-    private void captureExpanded(TreeItem<JsonTreeNode> item, Set<String> expanded) {
+    private void captureExpanded(TreeItem<JsonTreeNode> item, Set<JsonPath> expanded) {
         if (item.isExpanded()) {
             expanded.add(item.getValue().getPath());
         }
@@ -104,11 +105,11 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         }
     }
 
-    private void restoreExpandedPaths(TreeItem<JsonTreeNode> root, Set<String> expanded) {
+    private void restoreExpandedPaths(TreeItem<JsonTreeNode> root, Set<JsonPath> expanded) {
         restoreExpanded(root, expanded);
     }
 
-    private void restoreExpanded(TreeItem<JsonTreeNode> item, Set<String> expanded) {
+    private void restoreExpanded(TreeItem<JsonTreeNode> item, Set<JsonPath> expanded) {
         if (expanded.contains(item.getValue().getPath())) {
             item.setExpanded(true);
         }
@@ -117,9 +118,8 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         }
     }
 
-    private TreeItem<JsonTreeNode> buildTree(JsonNode node, String key, String path) {
-
-        String currentPath = path.isEmpty() ? key : path + "." + key;
+    private TreeItem<JsonTreeNode> buildTree(JsonNode node, String key, @Nullable JsonPath parentPath) {
+        JsonPath currentPath = new JsonPath(parentPath, key);
 
         JsonTreeNode.Type type;
 

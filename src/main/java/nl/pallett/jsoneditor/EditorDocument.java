@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 
 import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
 
@@ -148,8 +149,7 @@ public class EditorDocument {
     }
 
     public void scrollToJsonPath(JsonTreeNode node) {
-
-        String[] parts = node.getPath().split("\\.");
+        List<String> parts = node.getPath().toList();
 
         String text = codeArea.getText();
         int searchStart = 0;
