@@ -1,9 +1,19 @@
 package nl.pallett.jsoneditor;
 
-import javafx.scene.control.Label;
-import javafx.scene.control.TreeCell;
+import javafx.beans.binding.Bindings;
+import javafx.scene.control.*;
+import nl.pallett.jsoneditor.util.ClipboardUtil;
 
 public class JsonTreeCell extends TreeCell<JsonTreeNode> {
+
+    private final JsonTreeView treeView;
+
+    public JsonTreeCell(JsonTreeView treeView) {
+        super();
+        this.treeView = treeView;
+
+        createContextMenu();
+    }
 
     @Override
     protected void updateItem(JsonTreeNode item, boolean empty) {
@@ -53,5 +63,56 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
                 getStyleClass().add("json-null");
             }
         }
+    }
+
+    private void createContextMenu() {
+        // Create context menu for this cell
+        MenuItem copyKeyItem = new MenuItem("Copy key");
+        MenuItem copyValueItem = new MenuItem("Copy value");
+        MenuItem copyPathItem = new MenuItem("Copy JSON path");
+
+        MenuItem expandAllItem = new MenuItem("Expand All");
+        MenuItem collapseAllItem = new MenuItem("Collapse All");
+
+        copyKeyItem.setOnAction(e -> {
+            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            if (treeItem != null) {
+                ClipboardUtil.copyToClipboard(treeItem.getValue().getKey());
+            }
+        });
+
+        copyValueItem.setOnAction(e -> {
+            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            if (treeItem != null) {
+                ClipboardUtil.copyToClipboard(treeItem.getValue().getValue());
+            }
+        });
+
+        copyPathItem.setOnAction(e -> {
+            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            if (treeItem != null) {
+                ClipboardUtil.copyToClipboard(treeItem.getValue().getPath().toFullPath());
+            }
+        });
+
+        expandAllItem.setOnAction(e -> treeView.expandAll(treeView.getRoot()));
+        collapseAllItem.setOnAction(e -> treeView.collapseAll(treeView.getRoot()));
+
+
+        ContextMenu menu = new ContextMenu(
+                copyKeyItem,
+                copyValueItem,
+                copyPathItem,
+                new SeparatorMenuItem(),
+                expandAllItem,
+                collapseAllItem
+        );
+
+        // Only show menu for non-empty cells
+        contextMenuProperty().bind(
+                Bindings.when(emptyProperty())
+                        .then((ContextMenu) null)
+                        .otherwise(menu)
+        );
     }
 }

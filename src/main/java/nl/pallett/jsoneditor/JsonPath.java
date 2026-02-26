@@ -12,4 +12,23 @@ public record JsonPath(JsonPath parentPath, String key) {
         returnList.add(key());
         return returnList;
     }
+
+    public String toFullPath() {
+        String safeKey;
+        if (key().contains(".")) {
+            safeKey = "\"" + key() + "\"";
+        } else {
+            safeKey = key();
+        }
+
+        if (parentPath == null) {
+            safeKey = "$";
+        }
+
+        if (parentPath != null) {
+            return parentPath.toFullPath() + "." + safeKey;
+        } else {
+            return safeKey;
+        }
+    }
 }

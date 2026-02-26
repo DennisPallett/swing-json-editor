@@ -29,7 +29,7 @@ public class SwingJsonEditorApp extends Application {
         );
         root.setTop(menuBar);
 
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1000, 800);
         scene.getStylesheets().addAll(
                 getClass().getResource("/json-editor.css").toExternalForm(),
                 getClass().getResource("/style.css").toExternalForm(),

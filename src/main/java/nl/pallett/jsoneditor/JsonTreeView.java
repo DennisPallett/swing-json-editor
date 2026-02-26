@@ -2,6 +2,8 @@ package nl.pallett.jsoneditor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import org.jspecify.annotations.Nullable;
@@ -18,7 +20,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         super();
 
         setShowRoot(false);
-        setCellFactory(tv -> new JsonTreeCell());
+        setCellFactory(tv -> new JsonTreeCell(this));
 
         getSelectionModel()
                 .selectedItemProperty()
@@ -27,6 +29,28 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
                         document.scrollToJsonPath(newItem.getValue());
                     }
                 });
+
+        createContextMenu();
+    }
+
+    public void expandAll(TreeItem<?> item) {
+        if (item != null) {
+            item.setExpanded(true);
+            for (TreeItem<?> child : item.getChildren()) {
+                expandAll(child);
+            }
+        }
+    }
+
+    public void collapseAll(TreeItem<?> item) {
+        if (item != null) {
+            if (item.getParent() != null) {
+                item.setExpanded(false);
+            }
+            for (TreeItem<?> child : item.getChildren()) {
+                collapseAll(child);
+            }
+        }
     }
 
     public void refreshJsonTree(String json) {
@@ -60,6 +84,18 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
                     filterTree(unfilteredFullRoot, value.toLowerCase());
             setRoot(filteredRoot);
         }
+    }
+
+    private void createContextMenu() {
+        MenuItem expandAllItem = new MenuItem("Expand All");
+        MenuItem collapseAllItem = new MenuItem("Collapse All");
+        expandAllItem.setOnAction(e -> expandAll(getRoot()));
+        collapseAllItem.setOnAction(e -> collapseAll(getRoot()));
+        // Create context menu
+        ContextMenu contextMenu = new ContextMenu(expandAllItem, collapseAllItem);
+
+        // Attach it to the TreeView (applies to empty space and anywhere in the control)
+        setContextMenu(contextMenu);
     }
 
     private TreeItem<JsonTreeNode> filterTree(TreeItem<JsonTreeNode> source, String filter) {
