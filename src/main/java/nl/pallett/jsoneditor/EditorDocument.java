@@ -2,8 +2,6 @@ package nl.pallett.jsoneditor;
 
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
@@ -15,6 +13,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import nl.pallett.jsoneditor.util.HashUtil;
+import nl.pallett.jsoneditor.util.ObjectMapperUtil;
 import org.controlsfx.control.StatusBar;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
@@ -41,7 +40,7 @@ public class EditorDocument {
 
     private final JsonTreeView jsonTree;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     private long dirtyChecksum;
     private Timeline scrollAnimation;
@@ -53,10 +52,7 @@ public class EditorDocument {
         this.path = path;
         editor = new JsonCodeEditor();
 
-        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
-                .withArrayIndenter(new DefaultIndenter("    ", "\n"))   // 4 spaces + newline
-                .withObjectIndenter(new DefaultIndenter("    ", "\n"));
-        objectMapper.setDefaultPrettyPrinter(printer);
+        objectMapper = ObjectMapperUtil.getInstance();
 
         this.codeArea = editor.getCodeArea();
         this.containerPane = new BorderPane();

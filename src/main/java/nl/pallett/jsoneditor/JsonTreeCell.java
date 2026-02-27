@@ -1,8 +1,10 @@
 package nl.pallett.jsoneditor;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
 import nl.pallett.jsoneditor.util.ClipboardUtil;
+import nl.pallett.jsoneditor.util.ObjectMapperUtil;
 
 public class JsonTreeCell extends TreeCell<JsonTreeNode> {
 
@@ -70,6 +72,7 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
         MenuItem copyKeyItem = new MenuItem("Copy key");
         MenuItem copyValueItem = new MenuItem("Copy value");
         MenuItem copyPathItem = new MenuItem("Copy JSON path");
+        MenuItem copyJsonItem = new MenuItem("Copy full JSON");
 
         MenuItem expandAllItem = new MenuItem("Expand All");
         MenuItem collapseAllItem = new MenuItem("Collapse All");
@@ -95,6 +98,20 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
             }
         });
 
+        copyJsonItem.setOnAction(_ -> {
+            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            if (treeItem != null) {
+                try {
+                    String prettyJson = ObjectMapperUtil.getInstance()
+                            .writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(treeItem.getValue().getJsonNode());
+                    ClipboardUtil.copyToClipboard(prettyJson);
+                } catch (JsonProcessingException e) {
+                    SwingJsonEditorApp.showError(e);
+                }
+            }
+        });
+
         expandAllItem.setOnAction(e -> treeView.expandAll(treeView.getRoot()));
         collapseAllItem.setOnAction(e -> treeView.collapseAll(treeView.getRoot()));
 
@@ -103,6 +120,7 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
                 copyKeyItem,
                 copyValueItem,
                 copyPathItem,
+                copyJsonItem,
                 new SeparatorMenuItem(),
                 expandAllItem,
                 collapseAllItem

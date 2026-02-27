@@ -6,13 +6,14 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import nl.pallett.jsoneditor.util.ObjectMapperUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class JsonTreeView extends TreeView<JsonTreeNode> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = ObjectMapperUtil.getInstance();
 
     private TreeItem<JsonTreeNode> unfilteredFullRoot;
 
@@ -161,7 +162,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
 
         if (node.isObject()) {
             TreeItem<JsonTreeNode> item =
-                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.OBJECT, currentPath));
+                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.OBJECT, currentPath, node));
 
             node.fieldNames().forEachRemaining(field ->
                     item.getChildren().add(
@@ -173,7 +174,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
 
         if (node.isArray()) {
             TreeItem<JsonTreeNode> item =
-                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.ARRAY, currentPath));
+                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.ARRAY, currentPath, node));
 
             for (int i = 0; i < node.size(); i++) {
                 item.getChildren().add(
@@ -190,7 +191,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         else type = JsonTreeNode.Type.NULL;
 
         return new TreeItem<>(
-                new JsonTreeNode(key, node.asText(), type, currentPath)
+                new JsonTreeNode(key, node.asText(), type, currentPath, node)
         );
     }
 }

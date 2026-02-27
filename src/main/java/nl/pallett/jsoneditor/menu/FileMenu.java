@@ -1,6 +1,5 @@
 package nl.pallett.jsoneditor.menu;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -22,8 +21,6 @@ import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
 
 public class FileMenu extends Menu {
     private final EditorManager editorManager;
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     private final Stage stage;
 
