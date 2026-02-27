@@ -55,6 +55,26 @@ public class JsonCodeEditor {
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         codeArea.setWrapText(false);
 
+        codeArea.setOnKeyPressed(event -> {
+            if (event.isMetaDown()) {
+                switch (event.getCode()) {
+                    case Z:
+                        if (event.isShiftDown()) {
+                            codeArea.redo();   // Ctrl + Shift + Z
+                        } else {
+                            codeArea.undo();   // Ctrl + Z
+                        }
+                        event.consume();
+                        break;
+
+                    case Y:
+                        codeArea.redo();       // Ctrl + Y
+                        event.consume();
+                        break;
+                }
+            }
+        });
+
         // Debounced highlighting (prevents CPU spike while typing)
         codeArea.multiPlainChanges()
                 .successionEnds(Duration.ofMillis(300))

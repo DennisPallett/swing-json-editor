@@ -1,19 +1,20 @@
 package nl.pallett.jsoneditor;
 
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.controlsfx.control.StatusBar;
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.CodeArea;
 import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 
 public class EditorTab extends Tab {
-    public EditorTab(@Nullable Path path, String content, EditorDocument doc) {
+    public final EditorManager editorManager;
+
+    public EditorTab(@Nullable Path path, String content, EditorDocument doc, EditorManager editorManager) {
         super();
+        this.editorManager = editorManager;
 
         final String tabTitle = (path != null) ? path.getFileName().toString() : "Untitled";
         setText(tabTitle);
@@ -32,6 +33,15 @@ public class EditorTab extends Tab {
         // Make both take full width
         filterField.setMaxWidth(Double.MAX_VALUE);
         treeView.setMaxWidth(Double.MAX_VALUE);
+
+        // allow filter field to be cleared when pressing ESC
+        filterField.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                filterField.clear();
+                event.consume();
+            }
+        });
+
 
         // Allow TreeView to grow vertically
         VBox.setVgrow(treeView, Priority.ALWAYS);
@@ -52,6 +62,10 @@ public class EditorTab extends Tab {
             }
         });
 
+        setOnClosed(event -> {
+            editorManager.closeDocument(this);
+        });
+
         doc.dirtyProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
                 setText(tabTitle + "*");
@@ -60,6 +74,4 @@ public class EditorTab extends Tab {
             }
         });
     }
-
-
 }

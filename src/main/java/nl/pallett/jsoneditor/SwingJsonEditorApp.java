@@ -3,6 +3,7 @@ package nl.pallett.jsoneditor;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -41,6 +42,18 @@ public class SwingJsonEditorApp extends Application {
         stage.setTitle("Swing JSON Editor");
         stage.setScene(scene);
         stage.show();
+
+        stage.setOnCloseRequest(event -> {
+            if (editorManager.anyDirtyDocuments()) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText("Unsaved files");
+                alert.setContentText("There are unsaved files!\n\nAre you sure you want to close before saving?");
+
+                if (alert.showAndWait().get() != ButtonType.OK) {
+                    event.consume();
+                }
+            }
+        });
 
         // open application with an initial empty JSON document
         editorManager.openDocument(null, "");

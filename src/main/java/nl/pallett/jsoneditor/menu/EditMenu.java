@@ -20,11 +20,8 @@ public class EditMenu extends Menu {
         MenuItem formatJsonItem = new MenuItem("Format JSON");
 
         undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN));
-        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
+        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         formatJsonItem.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN));
-
-        undoItem.setDisable(true); // not yet supported
-        redoItem.setDisable(true); // not yet supported
 
         getItems().addAll(
                 undoItem,
@@ -34,6 +31,11 @@ public class EditMenu extends Menu {
         );
 
         formatJsonItem.setOnAction(e -> formatJson());
+        undoItem.setOnAction(e -> editorManager.getActiveEditor().undo());
+        redoItem.setOnAction(e -> editorManager.getActiveEditor().redo());
+
+        undoItem.disableProperty().bind(editorManager.undoAvailableProperty().not());
+        redoItem.disableProperty().bind(editorManager.redoAvailableProperty().not());
     }
 
     private void formatJson() {
