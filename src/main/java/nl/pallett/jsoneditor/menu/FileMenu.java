@@ -13,7 +13,6 @@ import nl.pallett.jsoneditor.EditorManager;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -74,12 +73,7 @@ public class FileMenu extends Menu {
 
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            try {
-                String content = Files.readString(file.toPath());
-                editorManager.openDocument(file.toPath(), content);
-            } catch (IOException ex) {
-                showError(ex);
-            }
+            editorManager.openDocument(file.toPath());
         }
     }
 

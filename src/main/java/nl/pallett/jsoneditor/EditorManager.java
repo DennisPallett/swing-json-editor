@@ -7,10 +7,14 @@ import javafx.scene.control.TabPane;
 import org.fxmisc.richtext.CodeArea;
 import org.jspecify.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
 
 public class EditorManager {
 
@@ -48,6 +52,18 @@ public class EditorManager {
             undoAvailableProperty.set(false);
             redoAvailableProperty.set(false);
         }
+    }
+
+    public boolean openDocument(Path path) {
+        try {
+            openDocument(path, Files.readString(path));
+            return true;
+        } catch (IOException ex) {
+            // todo: handle this error somehow gracefully
+            showError(ex);
+        }
+
+        return false;
     }
 
     public void openDocument(@Nullable Path path, String content) {
