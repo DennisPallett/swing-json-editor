@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor;
+package nl.pallett.jsoneditor.editor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

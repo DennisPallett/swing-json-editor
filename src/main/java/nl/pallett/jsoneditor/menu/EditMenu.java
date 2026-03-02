@@ -6,7 +6,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import nl.pallett.jsoneditor.EditorManager;
+import nl.pallett.jsoneditor.editor.EditorManager;
 
 public class EditMenu extends Menu {
     private final EditorManager editorManager;

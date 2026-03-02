@@ -1,8 +1,9 @@
-package nl.pallett.jsoneditor;
+package nl.pallett.jsoneditor.editor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
+import nl.pallett.jsoneditor.SwingJsonEditorApp;
 import nl.pallett.jsoneditor.util.ClipboardUtil;
 import nl.pallett.jsoneditor.util.ObjectMapperUtil;
 

@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor;
+package nl.pallett.jsoneditor.editor;
 
 import java.util.ArrayList;
 import java.util.List;

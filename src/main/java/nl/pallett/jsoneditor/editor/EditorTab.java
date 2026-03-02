@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor;
+package nl.pallett.jsoneditor.editor;
 
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;

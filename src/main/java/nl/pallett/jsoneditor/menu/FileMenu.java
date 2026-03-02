@@ -8,8 +8,8 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import nl.pallett.jsoneditor.EditorDocument;
-import nl.pallett.jsoneditor.EditorManager;
+import nl.pallett.jsoneditor.editor.EditorDocument;
+import nl.pallett.jsoneditor.editor.EditorManager;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;

@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor;
+package nl.pallett.jsoneditor.editor;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
@@ -54,16 +55,17 @@ public class EditorManager {
         }
     }
 
-    public boolean openDocument(Path path) {
+    public void openDocuments(List<String> filePaths) {
+        filePaths.forEach(filePath -> openDocument(Path.of(filePath)));
+    }
+
+    public void openDocument(Path path) {
         try {
             openDocument(path, Files.readString(path));
-            return true;
         } catch (IOException ex) {
             // todo: handle this error somehow gracefully
             showError(ex);
         }
-
-        return false;
     }
 
     public void openDocument(@Nullable Path path, String content) {
@@ -88,6 +90,10 @@ public class EditorManager {
 
     public Collection<EditorDocument> getOpenDocuments() {
         return openDocuments.values();
+    }
+
+    public boolean anyOpenDocuments() {
+        return !openDocuments.isEmpty();
     }
 
     public boolean anyDirtyDocuments() {
