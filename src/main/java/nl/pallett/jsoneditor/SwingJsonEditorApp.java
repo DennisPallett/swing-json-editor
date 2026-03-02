@@ -117,7 +117,7 @@ public class SwingJsonEditorApp extends Application {
             System.exit(0);
         }
     }
-    
+
     private static void bringToFront() {
         Platform.runLater(() -> {
             for (Stage stage : Stage.getWindows()

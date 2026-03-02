@@ -20,6 +20,7 @@ public class EditorTab extends Tab {
         setText(tabTitle);
 
         TextField filterField = new TextField();
+        filterField.setMinHeight(30);
         JsonTreeView treeView = doc.getJsonTree();
         VBox leftContainer = new VBox();
         leftContainer.setSpacing(5); // space between text field and tree

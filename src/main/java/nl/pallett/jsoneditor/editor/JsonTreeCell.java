@@ -103,7 +103,7 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
             TreeItem<JsonTreeNode> treeItem = getTreeItem();
             if (treeItem != null) {
                 try {
-                    String prettyJson = ObjectMapperUtil.getInstance()
+                    String prettyJson = ObjectMapperUtil.getJsonInstance()
                             .writerWithDefaultPrettyPrinter()
                             .writeValueAsString(treeItem.getValue().getJsonNode());
                     ClipboardUtil.copyToClipboard(prettyJson);

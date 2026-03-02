@@ -7,11 +7,14 @@ import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import nl.pallett.jsoneditor.util.ObjectMapperUtil;
 import org.controlsfx.control.StatusBar;
@@ -38,6 +41,8 @@ public class EditorDocument {
 
     private final PauseTransition debounce = new PauseTransition(Duration.millis(400));
 
+    private final ObjectProperty<EditorMode> currentMode = new SimpleObjectProperty<>();
+
     private final JsonTreeView jsonTree;
 
     private final ObjectMapper objectMapper;
@@ -52,7 +57,7 @@ public class EditorDocument {
         this.path = path;
         editor = new JsonCodeEditor();
 
-        objectMapper = ObjectMapperUtil.getInstance();
+        objectMapper = ObjectMapperUtil.getJsonInstance();
 
         this.codeArea = editor.getCodeArea();
         this.containerPane = new BorderPane();
@@ -62,6 +67,11 @@ public class EditorDocument {
 
         VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(codeArea);
 
+        EditorMode initialMode = FileUtil.isYamlFile(path) ? EditorMode.YAML : EditorMode.JSON;
+        EditorToolbar editorToolbar = new EditorToolbar(initialMode);
+        this.currentMode.bind(editorToolbar.currentMode());
+
+        containerPane.setTop(editorToolbar);
         containerPane.setCenter(scrollPane);
         containerPane.setBottom(statusBar);
 
@@ -227,4 +237,5 @@ public class EditorDocument {
     public Pane getContainer() {
         return containerPane;
     }
+    public EditorMode getEditorMode() { return currentMode.get(); }
 }

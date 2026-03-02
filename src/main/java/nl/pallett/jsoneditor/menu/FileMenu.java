@@ -67,7 +67,7 @@ public class FileMenu extends Menu {
     private void openFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("JSON files", "*.json"),
+                new FileChooser.ExtensionFilter("JSON/YAML files", "*.json", "*.yaml", "*.yml"),
                 new FileChooser.ExtensionFilter("All files", "*.*")
         );
 
