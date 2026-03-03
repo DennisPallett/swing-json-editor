@@ -10,6 +10,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -84,7 +85,21 @@ public class EditorDocument {
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         codeArea.textProperty().addListener((obs, oldVal, newVal) -> debounce.playFromStart());
 
+        currentMode.addListener(this::convertBetweenModes);
+
         init(content);
+    }
+
+    private void convertBetweenModes(ObservableValue<? extends EditorMode> obs, EditorMode previousMode, EditorMode newMode) {
+        // TODO: check if content is valid -> if not do not auto-convert
+        try {
+            Object currentDataTree = ObjectMapperUtil.getInstance(previousMode).readValue(codeArea.getText(), Object.class);
+            String newValue = ObjectMapperUtil.getInstance(newMode).writeValueAsString(currentDataTree);
+            codeArea.replaceText(newValue);
+            formatContent();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void init(String content) {
