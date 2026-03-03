@@ -1,21 +1,26 @@
-.json-key {
+.json-key, .yaml-key {
     -fx-fill: #328FAC;   /* light blue */
     -fx-font-weight: bold;
 }
 
-.json-string {
+.json-string, .yaml-string {
     -fx-fill: #B2762E;
     -fx-font-weight: bold;
 }
 
-.json-number {
+.json-number, .yaml-number {
     -fx-fill: #159943;
     -fx-font-weight: bold;
 }
 
-.json-boolean {
+.json-boolean, .yaml-boolean {
     -fx-fill: #676DFF;
     -fx-font-weight: bold;
+}
+
+.yaml-comment {
+    -fx-fill: #6a737d;
+    -fx-font-style: italic;
 }
 
 .json-null {

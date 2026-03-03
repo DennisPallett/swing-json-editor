@@ -58,7 +58,7 @@ public class SwingJsonEditorApp extends Application {
         );
 
         stage.initStyle(StageStyle.DECORATED);
-        stage.setTitle("Swing JSON Editor");
+        stage.setTitle("Swing JSON/YAML Editor");
         stage.setScene(scene);
         stage.show();
 

@@ -39,6 +39,6 @@ public class EditMenu extends Menu {
     }
 
     private void formatJson() {
-        editorManager.getActiveDocument().formatJson();
+        editorManager.getActiveDocument().formatContent();
     }
 }

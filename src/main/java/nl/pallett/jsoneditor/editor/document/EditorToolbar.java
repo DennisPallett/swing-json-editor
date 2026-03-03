@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor.editor;
+package nl.pallett.jsoneditor.editor.document;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -8,6 +8,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import nl.pallett.jsoneditor.editor.EditorMode;
 
 public class EditorToolbar extends ToolBar {
     private final ObjectProperty<EditorMode> currentMode = new SimpleObjectProperty<>();

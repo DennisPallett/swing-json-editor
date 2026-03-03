@@ -4,6 +4,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import nl.pallett.jsoneditor.editor.document.EditorDocument;
 import org.fxmisc.richtext.CodeArea;
 import org.jspecify.annotations.Nullable;
 

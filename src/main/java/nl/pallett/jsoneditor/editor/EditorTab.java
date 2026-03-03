@@ -5,6 +5,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import nl.pallett.jsoneditor.editor.document.EditorDocument;
+import nl.pallett.jsoneditor.editor.document.tree.JsonTreeView;
 import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;

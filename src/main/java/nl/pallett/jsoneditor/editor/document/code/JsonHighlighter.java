@@ -1,23 +1,14 @@
-package nl.pallett.jsoneditor.editor;
+package nl.pallett.jsoneditor.editor.document.code;
 
-import javafx.concurrent.Task;
-import javafx.scene.Node;
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JsonCodeEditor {
-
-    private final CodeArea codeArea = new CodeArea();
-
+public class JsonHighlighter {
     // --- JSON Regex Pattern ---
     private static final String KEY_PATTERN =
             "\"([^\"\\\\]|\\\\.)*\"(?=\\s*:)";
@@ -51,65 +42,7 @@ public class JsonCodeEditor {
                     + "|(?<COMMA>" + COMMA_PATTERN + ")"
     );
 
-    public JsonCodeEditor() {
-        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        codeArea.setWrapText(false);
-
-        codeArea.setOnKeyPressed(event -> {
-            if (event.isMetaDown()) {
-                switch (event.getCode()) {
-                    case Z:
-                        if (event.isShiftDown()) {
-                            codeArea.redo();   // Ctrl + Shift + Z
-                        } else {
-                            codeArea.undo();   // Ctrl + Z
-                        }
-                        event.consume();
-                        break;
-
-                    case Y:
-                        codeArea.redo();       // Ctrl + Y
-                        event.consume();
-                        break;
-                }
-            }
-        });
-
-        // Debounced highlighting (prevents CPU spike while typing)
-        codeArea.multiPlainChanges()
-                .successionEnds(Duration.ofMillis(300))
-                .subscribe(ignore -> computeHighlightingAsync());
-    }
-
-    public Node getNode() {
-        return new VirtualizedScrollPane<>(codeArea);
-    }
-
-    public CodeArea getCodeArea() {
-        return codeArea;
-    }
-
-    // --- Async Highlighting ---
-    public void computeHighlightingAsync() {
-        String text = codeArea.getText();
-
-        Task<StyleSpans<Collection<String>>> task = new Task<>() {
-            @Override
-            protected StyleSpans<Collection<String>> call() {
-                return computeHighlighting(text);
-            }
-        };
-
-        task.setOnSucceeded(e ->
-                codeArea.setStyleSpans(0, task.getValue())
-        );
-
-        new Thread(task, "json-highlighter").start();
-    }
-
-    // --- Core Highlighting Logic ---
-    private static StyleSpans<Collection<String>> computeHighlighting(String text) {
-
+    public static StyleSpans<Collection<String>> computeHighlighting(String text) {
         Matcher matcher = PATTERN.matcher(text);
         int lastKwEnd = 0;
 
@@ -142,14 +75,5 @@ public class JsonCodeEditor {
                 text.length() - lastKwEnd);
 
         return spansBuilder.create();
-    }
-
-    // --- Error Highlighting (Optional Feature) ---
-    public void highlightErrorLine(int line) {
-        int paragraph = line - 1;
-        if (paragraph >= 0 && paragraph < codeArea.getParagraphs().size()) {
-            codeArea.setParagraphStyle(paragraph,
-                    Collections.singleton("json-error-line"));
-        }
     }
 }

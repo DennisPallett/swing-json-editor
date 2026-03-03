@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor.editor;
+package nl.pallett.jsoneditor.editor.document;
 
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,9 +14,14 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+import nl.pallett.jsoneditor.editor.EditorMode;
+import nl.pallett.jsoneditor.editor.document.code.JsonCodeEditor;
+import nl.pallett.jsoneditor.editor.document.tree.JsonTreeNode;
+import nl.pallett.jsoneditor.editor.document.tree.JsonTreeView;
 import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import nl.pallett.jsoneditor.util.ObjectMapperUtil;
+import nl.pallett.jsoneditor.util.StringUtil;
 import org.controlsfx.control.StatusBar;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
@@ -45,8 +50,6 @@ public class EditorDocument {
 
     private final JsonTreeView jsonTree;
 
-    private final ObjectMapper objectMapper;
-
     private long dirtyChecksum;
     private Timeline scrollAnimation;
 
@@ -56,8 +59,6 @@ public class EditorDocument {
     public EditorDocument(@Nullable Path path, String content) {
         this.path = path;
         editor = new JsonCodeEditor();
-
-        objectMapper = ObjectMapperUtil.getJsonInstance();
 
         this.codeArea = editor.getCodeArea();
         this.containerPane = new BorderPane();
@@ -70,6 +71,7 @@ public class EditorDocument {
         EditorMode initialMode = FileUtil.isYamlFile(path) ? EditorMode.YAML : EditorMode.JSON;
         EditorToolbar editorToolbar = new EditorToolbar(initialMode);
         this.currentMode.bind(editorToolbar.currentMode());
+        this.editor.getEditorModeProperty().bind(editorToolbar.currentMode());
 
         containerPane.setTop(editorToolbar);
         containerPane.setCenter(scrollPane);
@@ -77,7 +79,7 @@ public class EditorDocument {
 
         jsonTree = new JsonTreeView(this);
 
-        debounce.setOnFinished(e -> handleJsonRefresh());
+        debounce.setOnFinished(e -> handleContentRefresh());
 
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         codeArea.textProperty().addListener((obs, oldVal, newVal) -> debounce.playFromStart());
@@ -185,20 +187,26 @@ public class EditorDocument {
         this.path = file;
     }
 
-    private void handleJsonRefresh() {
+    private void handleContentRefresh() {
         long newChecksum = HashUtil.crc32(codeArea.getText());
         dirty.set(dirtyChecksum != newChecksum);
 
         jsonTree.refreshJsonTree(codeArea.getText());
 
-        validateJson();
+        validateContent();
     }
 
-    public void formatJson() {
+    public void formatContent() {
         try {
-            Object json = objectMapper.readValue(codeArea.getText(), Object.class);
-            String formatted = objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(json);
+            String formatted;
+            if (getEditorMode() == EditorMode.JSON) {
+                ObjectMapper objectMapper = ObjectMapperUtil.getInstance(getEditorMode());
+                Object object = objectMapper.readValue(codeArea.getText(), Object.class);
+                formatted = objectMapper.writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(object);
+            } else {
+                formatted = StringUtil.formatYaml(codeArea.getText());
+            }
             codeArea.replaceText(formatted);
             editor.computeHighlightingAsync();
         } catch (Exception ex) {
@@ -206,13 +214,13 @@ public class EditorDocument {
         }
     }
 
-    private void validateJson() {
+    private void validateContent() {
         try {
-            objectMapper.readTree(codeArea.getText());
-            statusBar.setText("✅ Valid JSON");
+            ObjectMapperUtil.getInstance(getEditorMode()).readTree(codeArea.getText());
+            statusBar.setText("✅ Valid " + getEditorMode());
             statusBar.setTooltip(null);
         } catch (JsonProcessingException ex) {
-            String message = "❌ Invalid JSON";
+            String message = "❌ Invalid " + getEditorMode();
             JsonLocation errorLocation = ex.getLocation();
             if (errorLocation != null) {
                 message += " at line " + errorLocation.getLineNr()

@@ -1,6 +1,7 @@
-package nl.pallett.jsoneditor.editor;
+package nl.pallett.jsoneditor.editor.document.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import nl.pallett.jsoneditor.editor.document.JsonPath;
 
 public class JsonTreeNode {
 

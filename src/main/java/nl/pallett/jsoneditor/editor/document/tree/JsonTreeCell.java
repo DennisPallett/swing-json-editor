@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor.editor;
+package nl.pallett.jsoneditor.editor.document.tree;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.beans.binding.Bindings;
