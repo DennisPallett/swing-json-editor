@@ -1,5 +1,8 @@
 package nl.pallett.jsoneditor.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import nl.pallett.jsoneditor.editor.EditorMode;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.api.lowlevel.Compose;
@@ -23,6 +26,18 @@ public class StringUtil {
             i++;
         }
         return line.substring(0, i);
+    }
+
+    public static String formatCode(EditorMode editorMode, JsonNode node) throws JsonProcessingException {
+        String prettyCode = ObjectMapperUtil.getInstance(editorMode)
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(node);
+
+        if (editorMode == EditorMode.YAML) {
+            return formatYaml(prettyCode);
+        } else {
+            return prettyCode;
+        }
     }
 
     public static String formatYaml(String input) {

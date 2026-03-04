@@ -197,4 +197,8 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
                 new JsonTreeNode(key, node.asText(), type, currentPath, node)
         );
     }
+
+    public EditorDocument getEditorDocument () {
+        return editorDocument;
+    }
 }

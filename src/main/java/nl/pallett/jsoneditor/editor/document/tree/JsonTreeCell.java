@@ -5,7 +5,7 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
 import nl.pallett.jsoneditor.SwingJsonEditorApp;
 import nl.pallett.jsoneditor.util.ClipboardUtil;
-import nl.pallett.jsoneditor.util.ObjectMapperUtil;
+import nl.pallett.jsoneditor.util.StringUtil;
 
 public class JsonTreeCell extends TreeCell<JsonTreeNode> {
 
@@ -72,8 +72,18 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
         // Create context menu for this cell
         MenuItem copyKeyItem = new MenuItem("Copy key");
         MenuItem copyValueItem = new MenuItem("Copy value");
-        MenuItem copyPathItem = new MenuItem("Copy JSON path");
-        MenuItem copyJsonItem = new MenuItem("Copy full JSON");
+        MenuItem copyPathItem = new MenuItem();
+        MenuItem copyJsonItem = new MenuItem();
+
+        copyPathItem.textProperty().bind(Bindings.createStringBinding(
+                () -> "Copy " + treeView.getEditorDocument().getEditorMode() + " path",
+                treeView.getEditorDocument().getEditorModeProperty()))
+        ;
+
+        copyJsonItem.textProperty().bind(Bindings.createStringBinding(
+                () -> "Copy full " + treeView.getEditorDocument().getEditorMode(),
+                treeView.getEditorDocument().getEditorModeProperty()))
+        ;
 
         MenuItem expandAllItem = new MenuItem("Expand All");
         MenuItem collapseAllItem = new MenuItem("Collapse All");
@@ -103,10 +113,11 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
             TreeItem<JsonTreeNode> treeItem = getTreeItem();
             if (treeItem != null) {
                 try {
-                    String prettyJson = ObjectMapperUtil.getJsonInstance()
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(treeItem.getValue().getJsonNode());
-                    ClipboardUtil.copyToClipboard(prettyJson);
+                    String prettyCode = StringUtil.formatCode(
+                            treeView.getEditorDocument().getEditorMode(),
+                            treeItem.getValue().getJsonNode()
+                    );
+                    ClipboardUtil.copyToClipboard(prettyCode);
                 } catch (JsonProcessingException e) {
                     SwingJsonEditorApp.showError(e);
                 }

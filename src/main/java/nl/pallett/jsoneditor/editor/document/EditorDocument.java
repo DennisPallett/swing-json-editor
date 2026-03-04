@@ -279,4 +279,5 @@ public class EditorDocument {
         return containerPane;
     }
     public EditorMode getEditorMode() { return currentMode.get(); }
+    public ObjectProperty<EditorMode> getEditorModeProperty() { return currentMode; }
 }
