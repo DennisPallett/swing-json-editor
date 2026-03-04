@@ -51,6 +51,8 @@ public class EditorDocument {
 
     private final JsonTreeView jsonTree;
 
+    private final EditorToolbar editorToolbar;
+
     private long dirtyChecksum;
     private Timeline scrollAnimation;
 
@@ -70,7 +72,7 @@ public class EditorDocument {
         VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(codeArea);
 
         EditorMode initialMode = FileUtil.isYamlFile(path) ? EditorMode.YAML : EditorMode.JSON;
-        EditorToolbar editorToolbar = new EditorToolbar(initialMode);
+        editorToolbar = new EditorToolbar(initialMode);
         this.currentMode.bind(editorToolbar.currentMode());
         this.editor.getEditorModeProperty().bind(editorToolbar.currentMode());
 
@@ -83,11 +85,27 @@ public class EditorDocument {
         debounce.setOnFinished(e -> handleContentRefresh());
 
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        codeArea.textProperty().addListener((obs, oldVal, newVal) -> debounce.playFromStart());
+        codeArea.textProperty().addListener((obs, oldVal, newVal) -> {
+            autoDetectEditorMode(oldVal, newVal);
+            debounce.playFromStart();
+        });
 
         currentMode.addListener(this::convertBetweenModes);
 
         init(content);
+    }
+
+    private void autoDetectEditorMode(String oldContent, String newContent) {
+        // try to auto-detect right editor mode when pasting new content
+        if (path == null && newContent != null && (oldContent == null || oldContent.trim().isEmpty())) {
+            boolean isJson = (
+                    newContent.contains("{")
+                    || newContent.contains("}")
+                    || newContent.contains("[")
+                    || newContent.contains("]")
+            );
+            editorToolbar.currentMode().set(isJson ? EditorMode.JSON : EditorMode.YAML);
+        }
     }
 
     private void convertBetweenModes(ObservableValue<? extends EditorMode> obs, EditorMode previousMode, EditorMode newMode) {
