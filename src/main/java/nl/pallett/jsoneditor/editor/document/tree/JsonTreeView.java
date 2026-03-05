@@ -1,14 +1,17 @@
 package nl.pallett.jsoneditor.editor.document.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import nl.pallett.jsoneditor.editor.document.EditorDocument;
 import nl.pallett.jsoneditor.editor.document.JsonPath;
 import nl.pallett.jsoneditor.util.ObjectMapperUtil;
 import org.jspecify.annotations.Nullable;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JsonTreeView extends TreeView<JsonTreeNode> {
 
@@ -27,9 +30,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
                 .selectedItemProperty()
                 .addListener((obs, oldItem, newItem) -> {
                     if (newItem != null) {
-                        IndexRange range = newItem.getValue().getRange();
-                        System.out.println(newItem.getValue().getPointer() + " == " + range.toString());
-                        document.scrollToJsonPath(range);
+                        document.scrollToJsonPath(newItem.getValue());
                     }
                 });
 
@@ -57,24 +58,6 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
     }
 
     public void refreshJsonTree(String json) {
-        try {
-            TreeItem<JsonTreeNode> root =
-                    JsonTreeBuilder.build(json);
-
-            setRoot(root);
-        } catch (IOException e) {
-            // todo
-        }
-    }
-
-    private static String buildPointer(Deque<String> stack) {
-        if (stack.isEmpty()) return "";
-        List<String> list = new ArrayList<>(stack);
-        Collections.reverse(list);
-        return "/" + String.join("/", list);
-    }
-
-    public void refreshJsonTreeOLD(String json) {
         try {
             Set<JsonPath> expanded = new HashSet<>();
 
