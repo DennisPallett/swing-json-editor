@@ -8,8 +8,8 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import nl.pallett.jsoneditor.editor.EditorDocument;
 import nl.pallett.jsoneditor.editor.EditorManager;
+import nl.pallett.jsoneditor.editor.document.EditorDocument;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;
@@ -67,7 +67,7 @@ public class FileMenu extends Menu {
     private void openFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("JSON files", "*.json"),
+                new FileChooser.ExtensionFilter("JSON/YAML files", "*.json", "*.yaml", "*.yml"),
                 new FileChooser.ExtensionFilter("All files", "*.*")
         );
 

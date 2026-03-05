@@ -5,6 +5,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import nl.pallett.jsoneditor.editor.document.EditorDocument;
+import nl.pallett.jsoneditor.editor.document.tree.JsonTreeView;
 import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
@@ -20,6 +22,7 @@ public class EditorTab extends Tab {
         setText(tabTitle);
 
         TextField filterField = new TextField();
+        filterField.setMinHeight(30);
         JsonTreeView treeView = doc.getJsonTree();
         VBox leftContainer = new VBox();
         leftContainer.setSpacing(5); // space between text field and tree

@@ -22,3 +22,8 @@
 .flash-line {
     -fx-background-color: rgba(100, 149, 237, 0.25);  /* soft blue */
 }
+
+.code-area {
+    -fx-font-family: "SF Mono";
+    -fx-font-size: 13px;
+}

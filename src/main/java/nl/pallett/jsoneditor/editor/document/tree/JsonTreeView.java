@@ -1,11 +1,12 @@
-package nl.pallett.jsoneditor.editor;
+package nl.pallett.jsoneditor.editor.document.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import nl.pallett.jsoneditor.editor.document.EditorDocument;
+import nl.pallett.jsoneditor.editor.document.JsonPath;
 import nl.pallett.jsoneditor.util.ObjectMapperUtil;
 import org.jspecify.annotations.Nullable;
 
@@ -13,12 +14,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class JsonTreeView extends TreeView<JsonTreeNode> {
-    private final ObjectMapper objectMapper = ObjectMapperUtil.getInstance();
 
     private TreeItem<JsonTreeNode> unfilteredFullRoot;
 
+    private final EditorDocument editorDocument;
+
     public JsonTreeView(EditorDocument document) {
         super();
+        this.editorDocument = document;
 
         setShowRoot(false);
         setCellFactory(tv -> new JsonTreeCell(this));
@@ -62,7 +65,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
                 expanded = captureExpandedPaths(getRoot());
             }
 
-            JsonNode node = objectMapper.readTree(json);
+            JsonNode node = ObjectMapperUtil.getInstance(editorDocument.getEditorMode()).readTree(json);
 
             TreeItem<JsonTreeNode> newRoot =
                     buildTree(node, "root", null);
@@ -193,5 +196,9 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         return new TreeItem<>(
                 new JsonTreeNode(key, node.asText(), type, currentPath, node)
         );
+    }
+
+    public EditorDocument getEditorDocument () {
+        return editorDocument;
     }
 }
