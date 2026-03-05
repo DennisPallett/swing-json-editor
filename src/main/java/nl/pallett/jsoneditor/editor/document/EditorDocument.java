@@ -199,8 +199,8 @@ public class EditorDocument {
 
             if (part.equals("root")) continue;
             if (part.startsWith("[")) continue;
-
-            String search = "\"" + part + "\"";
+            
+            var search = (getEditorMode() == EditorMode.JSON) ? "\"" + part + "\"" : part + ":";
 
             int index = text.indexOf(search, searchStart);
             if (index < 0) return;
