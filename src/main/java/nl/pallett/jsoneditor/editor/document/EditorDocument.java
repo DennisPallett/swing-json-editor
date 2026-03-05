@@ -11,12 +11,13 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import nl.pallett.jsoneditor.editor.EditorMode;
+import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.document.code.JsonCodeEditor;
 import nl.pallett.jsoneditor.editor.document.tree.JsonTreeView;
 import nl.pallett.jsoneditor.util.FileUtil;
@@ -31,6 +32,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
 
@@ -57,6 +60,9 @@ public class EditorDocument {
 
     private int lastFlashedParagraph = -1;
     private Timeline flashTimeline;
+
+    private boolean updatingFromTree = false;
+    private boolean updatingFromEditor = false;
 
     public EditorDocument(@Nullable Path path, String content) {
         this.path = path;
@@ -89,9 +95,58 @@ public class EditorDocument {
             debounce.playFromStart();
         });
 
+        codeArea.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+            if (updatingFromTree) return;
+            updatingFromEditor = true;
+
+            //AstNode node = index.findDeepest(pos.intValue());
+            //if (node != null)
+            //    selectTreeItem(node);
+
+            // TODO
+//            AstNode node = index.findNode(n.intValue());
+//            if(node == null) return;
+//            TreeItem<AstNode> treeItem =
+//                    findTreeItem(treeView.getRoot(), node);
+//            jsonTree.getSelectionModel().select(treeItem);
+
+            jsonTree.selectNodeForCaretPosition(newPos);
+
+            updatingFromEditor = false;
+        });
+
+        jsonTree.getSelectionModel()
+                .selectedItemProperty()
+                .addListener((obs, oldItem, newItem) -> {
+                    if(newItem == null) return;
+
+                    if (updatingFromEditor) return;
+                    updatingFromTree = true;
+
+                    // TODO:
+                    //AstNode node = newItem.getValue();
+                    //scrollToJsonPath(node.getStartOffset());
+
+
+                    //IndexRange range = newItem.getValue().getRange();
+                    //scrollToJsonPath(range.getStart());
+
+                });
+
         currentMode.addListener(this::convertBetweenModes);
 
         init(content);
+    }
+
+    Map<AstNode, TreeItem<AstNode>> nodeToItem = new HashMap<>();
+
+    //TreeItem<AstNode> item = new TreeItem<>(node);
+    //nodeToItem.put(node, item);
+
+    private void selectTreeItem(AstNode node) {
+
+        TreeItem<AstNode> item = nodeToItem.get(node);
+        //jsonTree.getSelectionModel().select(item);
     }
 
     private void autoDetectEditorMode(String oldContent, String newContent) {
@@ -130,6 +185,7 @@ public class EditorDocument {
     }
 
     private void flashCurrentLine() {
+        updatingFromTree = false;
         int paragraph = codeArea.getCurrentParagraph();
 
         // Clear previous flash immediately
@@ -157,14 +213,14 @@ public class EditorDocument {
         flashTimeline.play();
     }
 
-    private void smoothScrollToOffset(IndexRange indexRange) {
+    private void smoothScrollToOffset(int strollToPos) {
 
         if (scrollAnimation != null) {
             scrollAnimation.stop();
         }
 
         int startOffset = codeArea.getCaretPosition();
-        int distance = indexRange.getStart() - startOffset;
+        int distance = strollToPos - startOffset;
 
         int steps = 15;          // smoothness
         int durationMs = 250;    // total animation time
@@ -192,9 +248,8 @@ public class EditorDocument {
         scrollAnimation.play();
     }
 
-    public void scrollToJsonPath(IndexRange indexRange) {
-
-        smoothScrollToOffset(indexRange);
+    public void scrollToJsonPath(int strollToPos) {
+        smoothScrollToOffset(strollToPos);
     }
 
     public void setDirtyChecksum(String content) {

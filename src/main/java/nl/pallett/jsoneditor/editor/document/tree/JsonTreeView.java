@@ -2,19 +2,32 @@ package nl.pallett.jsoneditor.editor.document.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.scene.control.*;
+import nl.pallett.jsoneditor.editor.EditorMode;
+import nl.pallett.jsoneditor.editor.ast.AstNode;
+import nl.pallett.jsoneditor.editor.ast.AstPrinter;
 import nl.pallett.jsoneditor.editor.document.EditorDocument;
 import nl.pallett.jsoneditor.editor.document.JsonPath;
-import nl.pallett.jsoneditor.util.ObjectMapperUtil;
+import nl.pallett.jsoneditor.editor.parser.FormatParser;
+import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
+import nl.pallett.jsoneditor.editor.parser.YamlParserAdapter;
 import org.jspecify.annotations.Nullable;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class JsonTreeView extends TreeView<JsonTreeNode> {
+public class JsonTreeView extends TreeView<AstNode> {
 
     private TreeItem<JsonTreeNode> unfilteredFullRoot;
 
     private final EditorDocument editorDocument;
+
+    private List<TreeItem<JsonTreeNode>> flatNodes = new ArrayList<>();
+
+    private final FormatParser jsonParser = new JsonParserAdapter();
+
+    private final FormatParser yamlParser = new YamlParserAdapter();
 
     public JsonTreeView(EditorDocument document) {
         super();
@@ -22,16 +35,6 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
 
         setShowRoot(false);
         setCellFactory(tv -> new JsonTreeCell(this));
-
-        getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, oldItem, newItem) -> {
-                    if (newItem != null) {
-                        IndexRange range = newItem.getValue().getRange();
-                        System.out.println(newItem.getValue().getPointer() + " == " + range.toString());
-                        document.scrollToJsonPath(range);
-                    }
-                });
 
         createContextMenu();
     }
@@ -56,55 +59,69 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         }
     }
 
-    public void refreshJsonTree(String json) {
+    public void refreshJsonTree(String text) {
+        // todo
         try {
-            TreeItem<JsonTreeNode> root =
-                    JsonTreeBuilder.build(json);
-
-            setRoot(root);
-        } catch (IOException e) {
-            // todo
-        }
-    }
-
-    private static String buildPointer(Deque<String> stack) {
-        if (stack.isEmpty()) return "";
-        List<String> list = new ArrayList<>(stack);
-        Collections.reverse(list);
-        return "/" + String.join("/", list);
-    }
-
-    public void refreshJsonTreeOLD(String json) {
-        try {
-            Set<JsonPath> expanded = new HashSet<>();
-
-            if (getRoot() != null) {
-                expanded = captureExpandedPaths(getRoot());
+            AstNode root;
+            if (editorDocument.getEditorMode() == EditorMode.JSON) {
+                root = jsonParser.parse(text);
+            } else {
+                root = yamlParser.parse(text);
             }
+            AstTreeBuilder builder = new AstTreeBuilder();
 
-            JsonNode node = ObjectMapperUtil.getInstance(editorDocument.getEditorMode()).readTree(json);
+            if (root != null) {
+                // Print the AST to the console
+                AstPrinter.printAst(root);
 
-            TreeItem<JsonTreeNode> newRoot =
-                    buildTree(node, "root", null);
-
-            setRoot(newRoot);
-            unfilteredFullRoot = getRoot();
-
-            restoreExpandedPaths(newRoot, expanded);
-
-        } catch (Exception ignored) {
-            // invalid JSON
+                TreeItem<AstNode> rootItem = builder.buildTree(root);
+                setRoot(rootItem);
+            }
+        } catch (Exception e) {
+            System.err.println(e);
         }
     }
+
+    public TreeItem<JsonTreeNode> selectNodeForCaretPosition(int caretPos) {
+
+        TreeItem<JsonTreeNode> best = null;
+        int smallestSize = Integer.MAX_VALUE;
+
+        for (TreeItem<JsonTreeNode> item : flatNodes) {
+
+            IndexRange r = item.getValue().getRange();
+            if (r == null) continue;
+
+            if (caretPos >= r.getStart() && caretPos <= r.getEnd()) {
+
+                int size = r.getEnd() - r.getStart();
+
+                if (size < smallestSize) {
+                    smallestSize = size;
+                    best = item;
+                }
+            }
+        }
+
+        if (best != null) {
+            //getSelectionModel().select(best);
+            //scrollTo(getRow(best));
+        }
+
+        return best;
+    }
+
+
+
 
     public void filterOnValue(String value) {
-        if (value == null || value.isBlank()) {
-            setRoot(unfilteredFullRoot);
-        } else {
-            TreeItem<JsonTreeNode> filteredRoot =
-                    filterTree(unfilteredFullRoot, value.toLowerCase());
-            setRoot(filteredRoot);
-        }
+//        if (value == null || value.isBlank()) {
+//            setRoot(unfilteredFullRoot);
+//        } else {
+//            TreeItem<JsonTreeNode> filteredRoot =
+//                    filterTree(unfilteredFullRoot, value.toLowerCase());
+//            setRoot(filteredRoot);
+//        }
     }
 
     private void createContextMenu() {

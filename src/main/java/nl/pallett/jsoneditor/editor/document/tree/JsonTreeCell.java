@@ -1,13 +1,11 @@
 package nl.pallett.jsoneditor.editor.document.tree;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
-import nl.pallett.jsoneditor.SwingJsonEditorApp;
+import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.util.ClipboardUtil;
-import nl.pallett.jsoneditor.util.StringUtil;
 
-public class JsonTreeCell extends TreeCell<JsonTreeNode> {
+public class JsonTreeCell extends TreeCell<AstNode> {
 
     private final JsonTreeView treeView;
 
@@ -19,7 +17,7 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
     }
 
     @Override
-    protected void updateItem(JsonTreeNode item, boolean empty) {
+    protected void updateItem(AstNode item, boolean empty) {
         super.updateItem(item, empty);
 
         if (empty || item == null) {
@@ -39,33 +37,75 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
                 "json-boolean", "json-null"
         );
 
-        switch (item.getType()) {
-            case OBJECT -> {
-                setText(item.getKey() + " { }");
-                getStyleClass().add("json-object");
-                setGraphic(new Label("🟣"));
-            }
-            case ARRAY -> {
-                setText(item.getKey() + " [ ]");
-                getStyleClass().add("json-array");
-            }
-            case STRING -> {
-                setText(item.getKey() + " : \"" + item.getValue() + "\"");
-                getStyleClass().add("json-string");
-            }
-            case NUMBER -> {
-                setText(item.getKey() + " : " + item.getValue());
-                getStyleClass().add("json-number");
-            }
-            case BOOLEAN -> {
-                setText(item.getKey() + " : " + item.getValue());
-                getStyleClass().add("json-boolean");
-            }
-            case NULL -> {
-                setText(item.getKey() + " : null");
-                getStyleClass().add("json-null");
-            }
+        if (empty || item == null) {
+            setText(null);
+            return;
         }
+
+        setText(format(item));
+
+//        switch (item.getType()) {
+//            case OBJECT -> {
+//                setText(item.getKey() + " { }");
+//                getStyleClass().add("json-object");
+//                setGraphic(new Label("🟣"));
+//            }
+//            case ARRAY -> {
+//                setText(item.getKey() + " [ ]");
+//                getStyleClass().add("json-array");
+//            }
+//            case STRING -> {
+//                setText(item.getKey() + " : \"" + item.getValue() + "\"");
+//                getStyleClass().add("json-string");
+//            }
+//            case NUMBER -> {
+//                setText(item.getKey() + " : " + item.getValue());
+//                getStyleClass().add("json-number");
+//            }
+//            case BOOLEAN -> {
+//                setText(item.getKey() + " : " + item.getValue());
+//                getStyleClass().add("json-boolean");
+//            }
+//            case NULL -> {
+//                setText(item.getKey() + " : null");
+//                getStyleClass().add("json-null");
+//            }
+//        }
+    }
+
+    private String format(AstNode node) {
+
+        switch (node.getType()) {
+
+            case DOCUMENT:
+                return "document";
+
+            case OBJECT:
+                return node.getKey() != null
+                        ? node.getKey() + " { }"
+                        : "{ }";
+
+            case ARRAY:
+                return node.getKey() != null
+                        ? node.getKey() + " [ ]"
+                        : "[ ]";
+
+            case VALUE:
+                if (node.getKey() != null)
+                    return node.getKey() + ": " + node.getValue();
+                else
+                    return node.getValue();
+            case PROPERTY:
+                return node.getKey();
+
+            case COMMENT:
+                return "# " + node.getValue();
+
+            case ALIAS:
+                return "*" + node.getAlias();
+        }
+
+        return node.getKey() != null ? node.getKey() : "?";
     }
 
     private void createContextMenu() {
@@ -89,38 +129,38 @@ public class JsonTreeCell extends TreeCell<JsonTreeNode> {
         MenuItem collapseAllItem = new MenuItem("Collapse All");
 
         copyKeyItem.setOnAction(e -> {
-            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            TreeItem<AstNode> treeItem = getTreeItem();
             if (treeItem != null) {
                 ClipboardUtil.copyToClipboard(treeItem.getValue().getKey());
             }
         });
 
         copyValueItem.setOnAction(e -> {
-            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            TreeItem<AstNode> treeItem = getTreeItem();
             if (treeItem != null) {
                 ClipboardUtil.copyToClipboard(treeItem.getValue().getValue());
             }
         });
 
         copyPathItem.setOnAction(e -> {
-            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            TreeItem<AstNode> treeItem = getTreeItem();
             if (treeItem != null) {
-                ClipboardUtil.copyToClipboard(treeItem.getValue().getPath().toFullPath());
+                //ClipboardUtil.copyToClipboard(treeItem.getValue().getPath().toFullPath());
             }
         });
 
         copyJsonItem.setOnAction(_ -> {
-            TreeItem<JsonTreeNode> treeItem = getTreeItem();
+            TreeItem<AstNode> treeItem = getTreeItem();
             if (treeItem != null) {
-                try {
-                    String prettyCode = StringUtil.formatCode(
-                            treeView.getEditorDocument().getEditorMode(),
-                            treeItem.getValue().getJsonNode()
-                    );
-                    ClipboardUtil.copyToClipboard(prettyCode);
-                } catch (JsonProcessingException e) {
-                    SwingJsonEditorApp.showError(e);
-                }
+//                try {
+//                    String prettyCode = StringUtil.formatCode(
+//                            treeView.getEditorDocument().getEditorMode(),
+//                            treeItem.getValue().getJsonNode()
+//                    );
+//                    ClipboardUtil.copyToClipboard(prettyCode);
+//                } catch (JsonProcessingException e) {
+//                    SwingJsonEditorApp.showError(e);
+//                }
             }
         });
 

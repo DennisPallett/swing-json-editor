@@ -1,0 +1,91 @@
+package nl.pallett.jsoneditor.editor.ast;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AstIntervalIndex {
+
+    private IntervalNode root;
+
+    public AstIntervalIndex(AstNode astRoot) {
+        List<AstNode> nodes = new ArrayList<>();
+        collect(astRoot, nodes);
+        root = build(nodes);
+    }
+
+    public AstNode findDeepest(int offset) {
+
+        return findDeepest(root, offset, null);
+    }
+
+    private AstNode findDeepest(IntervalNode node, int offset, AstNode best) {
+
+        if (node == null)
+            return best;
+
+        for (AstNode n : node.overlapping) {
+
+            if (n.startOffset <= offset && offset <= n.endOffset) {
+
+                if (best == null ||
+                        (n.endOffset - n.startOffset) < (best.endOffset - best.startOffset)) {
+
+                    best = n;
+                }
+            }
+        }
+
+        if (offset < node.center)
+            return findDeepest(node.left, offset, best);
+        else
+            return findDeepest(node.right, offset, best);
+    }
+
+    public IntervalNode build(List<AstNode> nodes) {
+
+        if (nodes.isEmpty())
+            return null;
+
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+
+        for (AstNode n : nodes) {
+
+            min = Math.min(min, n.startOffset);
+            max = Math.max(max, n.endOffset);
+        }
+
+        int center = (min + max) / 2;
+
+        List<AstNode> left = new ArrayList<>();
+        List<AstNode> right = new ArrayList<>();
+        List<AstNode> overlap = new ArrayList<>();
+
+        for (AstNode n : nodes) {
+
+            if (n.endOffset < center)
+                left.add(n);
+            else if (n.startOffset > center)
+                right.add(n);
+            else
+                overlap.add(n);
+        }
+
+        IntervalNode node = new IntervalNode();
+        node.center = center;
+        node.overlapping = overlap;
+
+        node.left = build(left);
+        node.right = build(right);
+
+        return node;
+    }
+
+    private void collect(AstNode node, List<AstNode> list) {
+
+        list.add(node);
+
+        for (AstNode c : node.getChildren())
+            collect(c, list);
+    }
+}
