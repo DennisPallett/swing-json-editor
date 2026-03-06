@@ -157,17 +157,25 @@
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
-        <configuration>
-          <mainClass>nl.pallett.jsoneditor.SwingJsonEditorApp</mainClass>
-          <!-- Fix macOS Dock name -->
+        <executions>
+          <execution>
+            <id>run</id>
+            <configuration>
+              <mainClass>nl.pallett.jsoneditor.SwingJsonEditorApp</mainClass>
+            </configuration>
+          </execution>
+          <execution>
+            <id>debug</id>
+            <configuration>
+              <mainClass>nl.pallett.jsoneditor.SwingJsonEditorApp</mainClass>
+              <options>
+                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</option>
+              </options>
+            </configuration>
+          </execution>
+        </executions>
 
-          <options>
-            <option>-Xdock:name=MyApp</option>
-          </options>
 
-          <!-- For jpackage builds -->
-          <launcher>MyApp</launcher>
-        </configuration>
       </plugin>
   </plugins>
   </build>
