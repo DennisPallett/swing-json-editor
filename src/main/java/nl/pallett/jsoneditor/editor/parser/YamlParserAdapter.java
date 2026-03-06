@@ -5,14 +5,29 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.events.*;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.parser.Parser;
+import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.scanner.ScannerImpl;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
+import org.yaml.snakeyaml.nodes.NodeId;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
 
 public class YamlParserAdapter implements FormatParser {
+
+    public enum YamlScalarType {
+        STRING,
+        INTEGER,
+        FLOAT,
+        BOOLEAN,
+        NULL,
+        TIMESTAMP
+    }
+
+    private static final Resolver resolver = new Resolver();
 
     @Override
     public AstNode parse(String text) {
@@ -21,7 +36,7 @@ public class YamlParserAdapter implements FormatParser {
 
         StreamReader reader = new StreamReader(settings, text);
         ScannerImpl scanner = new ScannerImpl(settings, reader);
-        Parser parser = new org.snakeyaml.engine.v2.parser.ParserImpl(settings, scanner);
+        Parser parser = new ParserImpl(settings, scanner);
 
         Deque<AstNode> stack = new ArrayDeque<>();
         AstNode root = new AstNode(AstNode.Type.DOCUMENT, null, null);
@@ -131,10 +146,10 @@ public class YamlParserAdapter implements FormatParser {
                         setStart(value, event.getStartMark());
                         setEnd(value, event.getEndMark());
 
+                        value.setValueType(toValueType(detectType(scalar)));
+
                         if (scalar.getAnchor().isPresent())
                             value.setAnchor(scalar.getAnchor().get().getValue());
-
-                        detectBlockStyle(value, scalar);
 
                         stack.peek().addChild(value);
 
@@ -200,17 +215,30 @@ public class YamlParserAdapter implements FormatParser {
         node.endColumn = mark.getColumn();
     }
 
-    private void detectBlockStyle(AstNode node, ScalarEvent scalar) {
+    public static YamlScalarType detectType(ScalarEvent event) {
 
-        switch (scalar.getScalarStyle()) {
+        String value = event.getValue();
+        Optional<String> tag = event.getTag();
 
-            case LITERAL:
-            case FOLDED:
-                node.setValueType(AstNode.ValueType.BLOCK);
-                break;
+        Tag resolved = tag.map(Tag::new).orElseGet(() -> resolver.resolve(NodeId.scalar, value, true));
 
-            default:
-                node.setValueType(AstNode.ValueType.STRING);
-        }
+        if (Tag.INT.equals(resolved)) return YamlScalarType.INTEGER;
+        if (Tag.FLOAT.equals(resolved)) return YamlScalarType.FLOAT;
+        if (Tag.BOOL.equals(resolved)) return YamlScalarType.BOOLEAN;
+        if (Tag.NULL.equals(resolved)) return YamlScalarType.NULL;
+        if (Tag.TIMESTAMP.equals(resolved)) return YamlScalarType.TIMESTAMP;
+
+        return YamlScalarType.STRING;
+    }
+
+    public static AstNode.ValueType toValueType (YamlScalarType yamlType) {
+        return switch (yamlType) {
+            case STRING -> AstNode.ValueType.STRING;
+            case INTEGER -> AstNode.ValueType.INTEGER;
+            case FLOAT -> AstNode.ValueType.FLOAT;
+            case BOOLEAN -> AstNode.ValueType.BOOLEAN;
+            case NULL -> AstNode.ValueType.NULL;
+            case TIMESTAMP -> AstNode.ValueType.TIMESTAMP;
+        };
     }
 }

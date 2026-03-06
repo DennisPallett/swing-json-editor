@@ -21,7 +21,10 @@ public class AstPrinter {
         if (node.getKey() != null) sb.append(" key=").append(node.getKey());
 
         // value if scalar
-        if (node.getValue() != null) sb.append(" value=").append(node.getValue());
+        if (node.getValue() != null) {
+            sb.append(" value=").append(node.getValue());
+            sb.append(" (").append(node.getValueType()).append(")");
+        }
 
         // YAML-specific info
         if (node.getAnchor() != null) sb.append(" anchor=").append(node.getAnchor());

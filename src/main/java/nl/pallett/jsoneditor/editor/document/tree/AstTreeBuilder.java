@@ -28,12 +28,22 @@ public class AstTreeBuilder {
             AstNode combined = new AstNode(AstNode.Type.VALUE,
                     node.getKey(),
                     valueNode.getValue());
+            combined.setValueType(valueNode.getValueType());
 
             combined.startOffset = node.startOffset;
             combined.endOffset = valueNode.endOffset;
 
             item = new TreeItem<>(combined);
+        } else if (node.getType() == AstNode.Type.PROPERTY &&
+                !node.getChildren().isEmpty() &&
+                (
+                        node.getChildren().getFirst().getType() == AstNode.Type.OBJECT
+                        ||
+                        node.getChildren().getFirst().getType() == AstNode.Type.ARRAY
+                )) {
 
+            node = node.getChildren().getFirst();
+            item = new TreeItem<>(node);
         } else {
 
             item = new TreeItem<>(node);

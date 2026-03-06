@@ -17,10 +17,12 @@ public class AstNode {
 
     public enum ValueType {
         STRING,
-        NUMBER,
+        INTEGER,
+        FLOAT,
         BOOLEAN,
         NULL,
-        BLOCK
+        BLOCK,
+        TIMESTAMP
     }
 
     private Type type;
@@ -75,6 +77,10 @@ public class AstNode {
 
     public void setValueType(ValueType valueType) {
         this.valueType = valueType;
+    }
+
+    public ValueType getValueType () {
+        return this.valueType;
     }
 
     public void setAnchor(String anchor) {

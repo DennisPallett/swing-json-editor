@@ -241,12 +241,14 @@ public class JsonParserAdapter implements FormatParser {
                 break;
 
             case VALUE_NUMBER_INT:
-            case VALUE_NUMBER_FLOAT:
-                node.setValueType(AstNode.ValueType.NUMBER);
+                node.setValueType(AstNode.ValueType.INTEGER);
                 break;
 
-            case VALUE_TRUE:
-            case VALUE_FALSE:
+            case VALUE_NUMBER_FLOAT:
+                node.setValueType(AstNode.ValueType.FLOAT);
+                break;
+
+            case VALUE_TRUE, VALUE_FALSE:
                 node.setValueType(AstNode.ValueType.BOOLEAN);
                 break;
 

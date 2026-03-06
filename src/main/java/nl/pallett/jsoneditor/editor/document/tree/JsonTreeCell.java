@@ -37,75 +37,53 @@ public class JsonTreeCell extends TreeCell<AstNode> {
                 "json-boolean", "json-null"
         );
 
-        if (empty || item == null) {
-            setText(null);
+        formatNode(item);
+    }
+
+    private void formatNodeValue(AstNode item) {
+        if (item.getValueType() == null) {
+            setText((item.getKey() != null) ? item.getKey() + " : \"" + item.getValue() + "\"" : item.getValue());
+            getStyleClass().add("json-string");
             return;
         }
 
-        setText(format(item));
-
-//        switch (item.getType()) {
-//            case OBJECT -> {
-//                setText(item.getKey() + " { }");
-//                getStyleClass().add("json-object");
-//                setGraphic(new Label("🟣"));
-//            }
-//            case ARRAY -> {
-//                setText(item.getKey() + " [ ]");
-//                getStyleClass().add("json-array");
-//            }
-//            case STRING -> {
-//                setText(item.getKey() + " : \"" + item.getValue() + "\"");
-//                getStyleClass().add("json-string");
-//            }
-//            case NUMBER -> {
-//                setText(item.getKey() + " : " + item.getValue());
-//                getStyleClass().add("json-number");
-//            }
-//            case BOOLEAN -> {
-//                setText(item.getKey() + " : " + item.getValue());
-//                getStyleClass().add("json-boolean");
-//            }
-//            case NULL -> {
-//                setText(item.getKey() + " : null");
-//                getStyleClass().add("json-null");
-//            }
-//        }
+        switch (item.getValueType()) {
+            case INTEGER, FLOAT -> {
+                setText(item.getKey() + " : " + item.getValue());
+                getStyleClass().add("json-number");
+            }
+            case BOOLEAN -> {
+                setText(item.getKey() + " : " + item.getValue());
+                getStyleClass().add("json-boolean");
+            }
+            case NULL -> {
+                setText(item.getKey() + " : null");
+                getStyleClass().add("json-null");
+            }
+            default -> {
+                setText((item.getKey() != null) ? item.getKey() + " : \"" + item.getValue() + "\"" : item.getValue());
+                getStyleClass().add("json-string");
+            }
+        }
     }
 
-    private String format(AstNode node) {
-
-        switch (node.getType()) {
-
-            case DOCUMENT:
-                return "document";
-
-            case OBJECT:
-                return node.getKey() != null
-                        ? node.getKey() + " { }"
-                        : "{ }";
-
-            case ARRAY:
-                return node.getKey() != null
-                        ? node.getKey() + " [ ]"
-                        : "[ ]";
-
-            case VALUE:
-                if (node.getKey() != null)
-                    return node.getKey() + ": " + node.getValue();
-                else
-                    return node.getValue();
-            case PROPERTY:
-                return node.getKey();
-
-            case COMMENT:
-                return "# " + node.getValue();
-
-            case ALIAS:
-                return "*" + node.getAlias();
+    private void formatNode(AstNode item) {
+        switch (item.getType()) {
+            case OBJECT -> {
+                setText(item.getKey() != null ? item.getKey() + " { }" : "{ }");
+                getStyleClass().add("json-object");
+                setGraphic(new Label("🟣"));
+            }
+            case ARRAY -> {
+                setText(item.getKey() + " [ ]");
+                getStyleClass().add("json-array");
+            }
+            case VALUE -> formatNodeValue(item);
+            case PROPERTY -> setText(item.getKey());
+            case COMMENT -> setText("# " + item.getValue());
+            case ALIAS -> setText("*" + item.getAlias());
+            case DOCUMENT -> setText("document");
         }
-
-        return node.getKey() != null ? node.getKey() : "?";
     }
 
     private void createContextMenu() {
