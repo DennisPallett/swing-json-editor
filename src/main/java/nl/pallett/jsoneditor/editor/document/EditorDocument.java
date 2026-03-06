@@ -122,10 +122,9 @@ public class EditorDocument {
 
                     if (updatingFromEditor) return;
                     updatingFromTree = true;
-
-                    // TODO:
-                    //AstNode node = newItem.getValue();
-                    //scrollToJsonPath(node.getStartOffset());
+                    
+                    AstNode node = newItem.getValue();
+                    scrollToJsonPath(node.getStartOffset());
 
 
                     //IndexRange range = newItem.getValue().getRange();
