@@ -1,6 +1,7 @@
 package nl.pallett.jsoneditor.editor.document.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import javafx.application.Platform;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
@@ -67,19 +68,39 @@ public class JsonTreeView extends TreeView<AstNode> {
         }
     }
 
-    public void selectTreeItem(AstNode node) {
-        TreeItem<AstNode> item = astTreeBuilder.getTreeItemForNode(node);
-        if (item != null) {
-            getSelectionModel().select(item);
-            scrollTo(getRow(item));
+    public void selectAndReveal(AstNode node) {
+        TreeItem<AstNode> item = astIntervalIndex.getTreeItemForNode(node);
+        if (item == null) {
+            return;
         }
+
+        // Expand all parents
+        TreeItem<AstNode> parent = item.getParent();
+        while (parent != null) {
+            parent.setExpanded(true);
+            parent = parent.getParent();
+        }
+
+        // Select the item
+        getSelectionModel().select(item);
+
+        // Scroll to it after layout updates
+        Platform.runLater(() -> {
+            int row = getRow(item);
+            if (row >= 0) {
+                scrollTo(row);
+                getFocusModel().focus(row);
+            }
+        });
     }
 
     public void selectTreeItemForCaretPosition(int caretPosition) {
         if (astIntervalIndex != null) {
+            System.out.println("Looking for: " + caretPosition);
             AstNode node = astIntervalIndex.findDeepest(caretPosition);
+            System.out.println("Node to select: " + node);
             if (node != null) {
-                selectTreeItem(node);
+                selectAndReveal(node);
             }
         }
     }
@@ -98,9 +119,10 @@ public class JsonTreeView extends TreeView<AstNode> {
                 // TODO: put in debug logging
                 AstPrinter.printAst(root);
 
-                astIntervalIndex = new AstIntervalIndex(root);
+                //astIntervalIndex = new AstIntervalIndex(root);
 
                 TreeItem<AstNode> rootItem = astTreeBuilder.buildTree(root);
+                astIntervalIndex = new AstIntervalIndex(rootItem);
                 setRoot(rootItem);
             }
         } catch (Exception e) {

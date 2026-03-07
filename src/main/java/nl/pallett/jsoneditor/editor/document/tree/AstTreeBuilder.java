@@ -2,22 +2,11 @@ package nl.pallett.jsoneditor.editor.document.tree;
 
 import javafx.scene.control.TreeItem;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
-import org.jspecify.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class AstTreeBuilder {
 
-    private final Map<AstNode, TreeItem<AstNode>> nodeToItem = new HashMap<>();
-
     public TreeItem<AstNode> buildTree(AstNode root) {
-        nodeToItem.clear();
         return buildFlat(root);
-    }
-
-    public @Nullable TreeItem<AstNode> getTreeItemForNode(AstNode node) {
-        return nodeToItem.get(node);
     }
 
     private TreeItem<AstNode> buildFlat(AstNode node) {
@@ -37,7 +26,11 @@ public class AstTreeBuilder {
             combined.setValueType(valueNode.getValueType());
 
             combined.startOffset = node.startOffset;
+            combined.startLine = node.startLine;
+            combined.startColumn = node.startColumn;
             combined.endOffset = valueNode.endOffset;
+            combined.endLine = valueNode.endLine;
+            combined.endColumn = valueNode.endColumn;
 
             item = new TreeItem<>(combined);
         } else if (node.getType() == AstNode.Type.PROPERTY &&
@@ -48,14 +41,18 @@ public class AstTreeBuilder {
                         node.getChildren().getFirst().getType() == AstNode.Type.ARRAY
                 )) {
 
-            node = node.getChildren().getFirst();
+            AstNode firstChild = node.getChildren().getFirst();
+
+            AstNode combined = AstNode.copyOf(firstChild);
+            combined.startColumn = node.startColumn;
+            combined.startLine = node.startLine;
+            combined.startOffset = node.startOffset;
+
+            node = combined;
             item = new TreeItem<>(node);
         } else {
-
             item = new TreeItem<>(node);
         }
-
-        nodeToItem.put(node, item);
 
         for (AstNode child : node.getChildren()) {
 

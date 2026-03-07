@@ -1,18 +1,27 @@
 package nl.pallett.jsoneditor.editor.ast;
 
+import javafx.scene.control.TreeItem;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AstIntervalIndex {
 
     private IntervalNode root;
 
-    public AstIntervalIndex(AstNode astRoot) {
+    private final Map<AstNode, TreeItem<AstNode>> nodeToItem = new HashMap<>();
+
+    public AstIntervalIndex(TreeItem<AstNode> astRoot) {
         List<AstNode> nodes = new ArrayList<>();
         collect(astRoot, nodes);
         root = build(nodes);
+    }
+
+    public @Nullable TreeItem<AstNode> getTreeItemForNode(AstNode node) {
+        return nodeToItem.get(node);
     }
 
     public @Nullable AstNode findDeepest(int offset) {
@@ -82,11 +91,13 @@ public class AstIntervalIndex {
         return node;
     }
 
-    private void collect(AstNode node, List<AstNode> list) {
+    private void collect(TreeItem<AstNode> item, List<AstNode> list) {
+        AstNode node = item.getValue();
+        list.add(item.getValue());
 
-        list.add(node);
+        nodeToItem.put(node, item);
 
-        for (AstNode c : node.getChildren())
+        for (TreeItem<AstNode> c : item.getChildren())
             collect(c, list);
     }
 }

@@ -48,6 +48,22 @@ public class AstNode {
 
     private final List<AstNode> children = new ArrayList<>();
 
+    public static AstNode copyOf(AstNode original) {
+        AstNode copy = new AstNode(original.getType(), original.getKey(), original.getValue());
+        copy.setValueType(original.getValueType());
+        copy.startOffset = original.startOffset;
+        copy.startLine = original.startLine;
+        copy.startColumn = original.startColumn;
+        copy.endOffset = original.endOffset;
+        copy.endLine = original.endLine;
+        copy.endColumn = original.endColumn;
+        copy.setAlias(original.getAlias());
+        copy.setAnchor(original.getAnchor());
+        copy.setPointer(original.getPointer());
+        original.getChildren().forEach(copy::addChild);
+        return copy;
+    }
+
     public AstNode(Type type, String key, String value) {
         this.type = type;
         this.key = key;
@@ -119,8 +135,30 @@ public class AstNode {
         return value;
     }
 
-    public void prettyPrint(String indent) {
-        System.out.println(indent + key + value);
-        children.forEach(child -> child.prettyPrint(indent + "  "));
+    @Override
+    public String toString () {
+        StringBuilder sb = new StringBuilder();
+
+        // node type
+        sb.append(getType());
+
+        // key for property or value with key
+        if (getKey() != null) sb.append(" key=").append(getKey());
+
+        // value if scalar
+        if (getValue() != null) {
+            sb.append(" value=").append(getValue());
+            sb.append(" (").append(getValueType()).append(")");
+        }
+
+        // YAML-specific info
+        if (getAnchor() != null) sb.append(" anchor=").append(getAnchor());
+        if (getAlias() != null) sb.append(" alias=").append(getAlias());
+
+        // optional: offsets
+        sb.append(" [").append(startOffset).append(", ").append(endOffset).append("]");
+
+        // print the line
+        return sb.toString();
     }
 }
