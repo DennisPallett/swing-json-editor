@@ -15,7 +15,10 @@ import nl.pallett.jsoneditor.editor.document.JsonPath;
 import nl.pallett.jsoneditor.editor.parser.FormatParser;
 import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
 import nl.pallett.jsoneditor.editor.parser.YamlParserAdapter;
+import nl.pallett.jsoneditor.util.TreeViewUtil;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 
 public class JsonTreeView extends TreeView<AstNode> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonTreeView.class);
 
     private TreeItem<JsonTreeNode> unfilteredFullRoot;
 
@@ -96,9 +101,12 @@ public class JsonTreeView extends TreeView<AstNode> {
 
     public void selectTreeItemForCaretPosition(int caretPosition) {
         if (astIntervalIndex != null) {
-            System.out.println("Looking for: " + caretPosition);
+            LOGGER.debug("Looking for: {}", caretPosition);
+
             AstNode node = astIntervalIndex.findDeepest(caretPosition);
-            System.out.println("Node to select: " + node);
+
+            LOGGER.debug("Node to select: {}", node);
+
             if (node != null) {
                 selectAndReveal(node);
             }
@@ -115,15 +123,25 @@ public class JsonTreeView extends TreeView<AstNode> {
             }
 
             if (root != null) {
-                // Print the AST to the console
-                // TODO: put in debug logging
-                AstPrinter.printAst(root);
-
-                //astIntervalIndex = new AstIntervalIndex(root);
+                // log the full AST
+                if (LOGGER.isDebugEnabled()) {
+                    AstPrinter.logAst(log -> LOGGER.debug("AST tree:\n{}", log), root);
+                }
 
                 TreeItem<AstNode> rootItem = astTreeBuilder.buildTree(root);
                 astIntervalIndex = new AstIntervalIndex(rootItem);
                 setRoot(rootItem);
+
+                // initial state of tree is somewhat collapsed to prevent node overload
+                Platform.runLater(() -> {
+                    collapseAll(rootItem);
+
+                    // for YAML we show 2 more levels
+                    if (editorDocument.getEditorMode() == EditorMode.YAML) {
+                        TreeViewUtil.setExpandedAtLevel(rootItem, 1, true);
+                        TreeViewUtil.setExpandedAtLevel(rootItem, 2, true);
+                    }
+                });
             }
         } catch (Exception e) {
             System.err.println(e);
