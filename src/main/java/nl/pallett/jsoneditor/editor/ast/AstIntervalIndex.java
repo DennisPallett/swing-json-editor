@@ -1,5 +1,7 @@
 package nl.pallett.jsoneditor.editor.ast;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +15,11 @@ public class AstIntervalIndex {
         root = build(nodes);
     }
 
-    public AstNode findDeepest(int offset) {
-
+    public @Nullable AstNode findDeepest(int offset) {
         return findDeepest(root, offset, null);
     }
 
-    private AstNode findDeepest(IntervalNode node, int offset, AstNode best) {
+    private @Nullable AstNode findDeepest(IntervalNode node, int offset, @Nullable AstNode best) {
 
         if (node == null)
             return best;

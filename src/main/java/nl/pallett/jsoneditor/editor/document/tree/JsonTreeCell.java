@@ -37,6 +37,8 @@ public class JsonTreeCell extends TreeCell<AstNode> {
                 "json-boolean", "json-null"
         );
 
+        setGraphic(null);
+
         formatNode(item);
     }
 

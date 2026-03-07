@@ -1,8 +1,12 @@
 package nl.pallett.jsoneditor.editor.document.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import nl.pallett.jsoneditor.editor.EditorMode;
+import nl.pallett.jsoneditor.editor.ast.AstIntervalIndex;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.ast.AstPrinter;
 import nl.pallett.jsoneditor.editor.document.EditorDocument;
@@ -28,6 +32,10 @@ public class JsonTreeView extends TreeView<AstNode> {
     private final FormatParser jsonParser = new JsonParserAdapter();
 
     private final FormatParser yamlParser = new YamlParserAdapter();
+
+    private final AstTreeBuilder astTreeBuilder = new AstTreeBuilder();
+
+    private AstIntervalIndex astIntervalIndex;
 
     public JsonTreeView(EditorDocument document) {
         super();
@@ -59,8 +67,24 @@ public class JsonTreeView extends TreeView<AstNode> {
         }
     }
 
+    public void selectTreeItem(AstNode node) {
+        TreeItem<AstNode> item = astTreeBuilder.getTreeItemForNode(node);
+        if (item != null) {
+            getSelectionModel().select(item);
+            scrollTo(getRow(item));
+        }
+    }
+
+    public void selectTreeItemForCaretPosition(int caretPosition) {
+        if (astIntervalIndex != null) {
+            AstNode node = astIntervalIndex.findDeepest(caretPosition);
+            if (node != null) {
+                selectTreeItem(node);
+            }
+        }
+    }
+
     public void refreshJsonTree(String text) {
-        // todo
         try {
             AstNode root;
             if (editorDocument.getEditorMode() == EditorMode.JSON) {
@@ -68,51 +92,21 @@ public class JsonTreeView extends TreeView<AstNode> {
             } else {
                 root = yamlParser.parse(text);
             }
-            AstTreeBuilder builder = new AstTreeBuilder();
 
             if (root != null) {
                 // Print the AST to the console
+                // TODO: put in debug logging
                 AstPrinter.printAst(root);
 
-                TreeItem<AstNode> rootItem = builder.buildTree(root);
+                astIntervalIndex = new AstIntervalIndex(root);
+
+                TreeItem<AstNode> rootItem = astTreeBuilder.buildTree(root);
                 setRoot(rootItem);
             }
         } catch (Exception e) {
             System.err.println(e);
         }
     }
-
-    public TreeItem<JsonTreeNode> selectNodeForCaretPosition(int caretPos) {
-
-        TreeItem<JsonTreeNode> best = null;
-        int smallestSize = Integer.MAX_VALUE;
-
-        for (TreeItem<JsonTreeNode> item : flatNodes) {
-
-            IndexRange r = item.getValue().getRange();
-            if (r == null) continue;
-
-            if (caretPos >= r.getStart() && caretPos <= r.getEnd()) {
-
-                int size = r.getEnd() - r.getStart();
-
-                if (size < smallestSize) {
-                    smallestSize = size;
-                    best = item;
-                }
-            }
-        }
-
-        if (best != null) {
-            //getSelectionModel().select(best);
-            //scrollTo(getRow(best));
-        }
-
-        return best;
-    }
-
-
-
 
     public void filterOnValue(String value) {
 //        if (value == null || value.isBlank()) {

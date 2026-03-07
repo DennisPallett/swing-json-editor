@@ -12,7 +12,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
@@ -32,8 +31,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
 
@@ -99,18 +96,9 @@ public class EditorDocument {
             if (updatingFromTree) return;
             updatingFromEditor = true;
 
-            //AstNode node = index.findDeepest(pos.intValue());
-            //if (node != null)
-            //    selectTreeItem(node);
-
-            // TODO
-//            AstNode node = index.findNode(n.intValue());
-//            if(node == null) return;
-//            TreeItem<AstNode> treeItem =
-//                    findTreeItem(treeView.getRoot(), node);
-//            jsonTree.getSelectionModel().select(treeItem);
-
-            jsonTree.selectNodeForCaretPosition(newPos);
+            if (newPos != null) {
+                jsonTree.selectTreeItemForCaretPosition(newPos);
+            }
 
             updatingFromEditor = false;
         });
@@ -125,27 +113,11 @@ public class EditorDocument {
                     
                     AstNode node = newItem.getValue();
                     scrollToJsonPath(node.getStartOffset());
-
-
-                    //IndexRange range = newItem.getValue().getRange();
-                    //scrollToJsonPath(range.getStart());
-
                 });
 
         currentMode.addListener(this::convertBetweenModes);
 
         init(content);
-    }
-
-    Map<AstNode, TreeItem<AstNode>> nodeToItem = new HashMap<>();
-
-    //TreeItem<AstNode> item = new TreeItem<>(node);
-    //nodeToItem.put(node, item);
-
-    private void selectTreeItem(AstNode node) {
-
-        TreeItem<AstNode> item = nodeToItem.get(node);
-        //jsonTree.getSelectionModel().select(item);
     }
 
     private void autoDetectEditorMode(String oldContent, String newContent) {

@@ -2,6 +2,7 @@ package nl.pallett.jsoneditor.editor.document.tree;
 
 import javafx.scene.control.TreeItem;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,12 @@ public class AstTreeBuilder {
     private final Map<AstNode, TreeItem<AstNode>> nodeToItem = new HashMap<>();
 
     public TreeItem<AstNode> buildTree(AstNode root) {
+        nodeToItem.clear();
         return buildFlat(root);
+    }
+
+    public @Nullable TreeItem<AstNode> getTreeItemForNode(AstNode node) {
+        return nodeToItem.get(node);
     }
 
     private TreeItem<AstNode> buildFlat(AstNode node) {
@@ -65,7 +71,4 @@ public class AstTreeBuilder {
         return item;
     }
 
-    public TreeItem<AstNode> getTreeItem(AstNode node) {
-        return nodeToItem.get(node);
-    }
 }
