@@ -2,8 +2,10 @@ package nl.pallett.jsoneditor.editor.document.tree;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
+import nl.pallett.jsoneditor.editor.EditorMode;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.util.ClipboardUtil;
+import nl.pallett.jsoneditor.util.StringUtil;
 
 public class JsonTreeCell extends TreeCell<AstNode> {
 
@@ -24,17 +26,17 @@ public class JsonTreeCell extends TreeCell<AstNode> {
             setText(null);
             setGraphic(null);
             getStyleClass().removeAll(
-                    "json-object", "json-array",
-                    "json-string", "json-number",
-                    "json-boolean", "json-null"
+                "json-object", "json-array",
+                "json-string", "json-number",
+                "json-boolean", "json-null"
             );
             return;
         }
 
         getStyleClass().removeAll(
-                "json-object", "json-array",
-                "json-string", "json-number",
-                "json-boolean", "json-null"
+            "json-object", "json-array",
+            "json-string", "json-number",
+            "json-boolean", "json-null"
         );
 
         setGraphic(null);
@@ -49,35 +51,53 @@ public class JsonTreeCell extends TreeCell<AstNode> {
             return;
         }
 
+        String text = "";
+        if (item.isArrayItem()) {
+            text += "[" + item.getArrayIndex() + "] ";
+        }
+
+        if (item.getKey() != null) {
+            text += item.getKey() + " : ";
+        }
+
         switch (item.getValueType()) {
             case INTEGER, FLOAT -> {
-                setText(item.getKey() + " : " + item.getValue());
+                text += item.getValue();
                 getStyleClass().add("json-number");
             }
             case BOOLEAN -> {
-                setText(item.getKey() + " : " + item.getValue());
+                text += item.getValue();
                 getStyleClass().add("json-boolean");
             }
             case NULL -> {
-                setText(item.getKey() + " : null");
+                text += "null";
                 getStyleClass().add("json-null");
             }
             default -> {
-                setText((item.getKey() != null) ? item.getKey() + " : \"" + item.getValue() + "\"" : item.getValue());
+                text += "\"" + item.getValue() + "\"";
                 getStyleClass().add("json-string");
             }
         }
+
+        setText(text);
     }
 
     private void formatNode(AstNode item) {
+        String text = "";
+        if (item.isArrayItem()) {
+            text += "[" + item.getArrayIndex() + "] ";
+        }
+
         switch (item.getType()) {
             case OBJECT -> {
-                setText(item.getKey() != null ? item.getKey() + " { }" : "{ }");
+                text += item.getKey() != null ? item.getKey() + " { }" : "{ }";
+                setText(text);
                 getStyleClass().add("json-object");
                 setGraphic(new Label("🟣"));
             }
             case ARRAY -> {
-                setText(item.getKey() + " [ ]");
+                text += item.getKey() + " [ ]";
+                setText(text);
                 getStyleClass().add("json-array");
             }
             case VALUE -> formatNodeValue(item);
@@ -96,13 +116,13 @@ public class JsonTreeCell extends TreeCell<AstNode> {
         MenuItem copyJsonItem = new MenuItem();
 
         copyPathItem.textProperty().bind(Bindings.createStringBinding(
-                () -> "Copy " + treeView.getEditorDocument().getEditorMode() + " path",
-                treeView.getEditorDocument().getEditorModeProperty()))
+            () -> "Copy " + treeView.getEditorDocument().getEditorMode() + " path",
+            treeView.getEditorDocument().getEditorModeProperty()))
         ;
 
         copyJsonItem.textProperty().bind(Bindings.createStringBinding(
-                () -> "Copy full " + treeView.getEditorDocument().getEditorMode(),
-                treeView.getEditorDocument().getEditorModeProperty()))
+            () -> "Copy full " + treeView.getEditorDocument().getEditorMode(),
+            treeView.getEditorDocument().getEditorModeProperty()))
         ;
 
         MenuItem expandAllItem = new MenuItem("Expand All");
@@ -125,22 +145,32 @@ public class JsonTreeCell extends TreeCell<AstNode> {
         copyPathItem.setOnAction(e -> {
             TreeItem<AstNode> treeItem = getTreeItem();
             if (treeItem != null) {
-                //ClipboardUtil.copyToClipboard(treeItem.getValue().getPath().toFullPath());
+                ClipboardUtil.copyToClipboard(treeItem.getValue().getPointer());
             }
         });
 
         copyJsonItem.setOnAction(_ -> {
             TreeItem<AstNode> treeItem = getTreeItem();
             if (treeItem != null) {
-//                try {
-//                    String prettyCode = StringUtil.formatCode(
-//                            treeView.getEditorDocument().getEditorMode(),
-//                            treeItem.getValue().getJsonNode()
-//                    );
-//                    ClipboardUtil.copyToClipboard(prettyCode);
-//                } catch (JsonProcessingException e) {
-//                    SwingJsonEditorApp.showError(e);
-//                }
+                AstNode node = treeItem.getValue();
+                if (node != null) {
+                    String content = treeView.getEditorDocument().getEditorContent(node.startOffset, node.endOffset);
+
+                    // work-around to copy a valid JSON structure
+                    if (treeView.getEditorDocument().getEditorMode() == EditorMode.JSON) {
+                        content = "{" + content + "}";
+                    }
+
+                    String formattedCode;
+                    try {
+                        formattedCode = StringUtil.formatCode(treeView.getEditorDocument().getEditorMode(), content);
+                    } catch (Exception _) {
+                        formattedCode = content;
+                    }
+
+                    ClipboardUtil.copyToClipboard(formattedCode);
+                }
+
             }
         });
 
@@ -149,20 +179,20 @@ public class JsonTreeCell extends TreeCell<AstNode> {
 
 
         ContextMenu menu = new ContextMenu(
-                copyKeyItem,
-                copyValueItem,
-                copyPathItem,
-                copyJsonItem,
-                new SeparatorMenuItem(),
-                expandAllItem,
-                collapseAllItem
+            copyKeyItem,
+            copyValueItem,
+            copyPathItem,
+            copyJsonItem,
+            new SeparatorMenuItem(),
+            expandAllItem,
+            collapseAllItem
         );
 
         // Only show menu for non-empty cells
         contextMenuProperty().bind(
-                Bindings.when(emptyProperty())
-                        .then((ContextMenu) null)
-                        .otherwise(menu)
+            Bindings.when(emptyProperty())
+                .then((ContextMenu) null)
+                .otherwise(menu)
         );
     }
 }

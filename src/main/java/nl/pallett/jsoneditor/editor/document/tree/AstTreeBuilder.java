@@ -24,7 +24,7 @@ public class AstTreeBuilder {
                     node.getKey(),
                     valueNode.getValue());
             combined.setValueType(valueNode.getValueType());
-
+            combined.setPointer(valueNode.getPointer());
             combined.startOffset = node.startOffset;
             combined.startLine = node.startLine;
             combined.startColumn = node.startColumn;

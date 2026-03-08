@@ -48,6 +48,8 @@ public class AstNode {
 
     private final List<AstNode> children = new ArrayList<>();
 
+    private Integer arrayIndex = null;
+
     public static AstNode copyOf(AstNode original) {
         AstNode copy = new AstNode(original.getType(), original.getKey(), original.getValue());
         copy.setValueType(original.getValueType());
@@ -60,6 +62,7 @@ public class AstNode {
         copy.setAlias(original.getAlias());
         copy.setAnchor(original.getAnchor());
         copy.setPointer(original.getPointer());
+        copy.setArrayIndex(original.getArrayIndex());
         original.getChildren().forEach(copy::addChild);
         return copy;
     }
@@ -135,6 +138,18 @@ public class AstNode {
         return value;
     }
 
+    public void setArrayIndex (Integer arrayIndex) {
+        this.arrayIndex = arrayIndex;
+    }
+
+    public Integer getArrayIndex () {
+        return arrayIndex;
+    }
+
+    public boolean isArrayItem () {
+        return arrayIndex != null;
+    }
+
     @Override
     public String toString () {
         StringBuilder sb = new StringBuilder();
@@ -145,10 +160,16 @@ public class AstNode {
         // key for property or value with key
         if (getKey() != null) sb.append(" key=").append(getKey());
 
+        if (isArrayItem()) sb.append(" array-index=").append(getArrayIndex());
+
         // value if scalar
         if (getValue() != null) {
             sb.append(" value=").append(getValue());
             sb.append(" (").append(getValueType()).append(")");
+        }
+
+        if (getPointer() != null) {
+            sb.append(" pointer=").append(getPointer());
         }
 
         // YAML-specific info

@@ -120,6 +120,10 @@ public class EditorDocument {
         init(content);
     }
 
+    public String getEditorContent(int startPos, int endPos) {
+        return codeArea.getText(startPos, endPos);
+    }
+
     private void autoDetectEditorMode(String oldContent, String newContent) {
         // try to auto-detect right editor mode when pasting new content
         if (path == null && newContent != null && (oldContent == null || oldContent.trim().isEmpty())) {
