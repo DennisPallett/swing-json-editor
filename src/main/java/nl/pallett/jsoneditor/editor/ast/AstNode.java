@@ -1,5 +1,7 @@
 package nl.pallett.jsoneditor.editor.ast;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +50,9 @@ public class AstNode {
 
     private final List<AstNode> children = new ArrayList<>();
 
-    private Integer arrayIndex = null;
+    private @Nullable Integer arrayIndex = null;
+
+    private @Nullable Integer arraySize = null;
 
     public static AstNode copyOf(AstNode original) {
         AstNode copy = new AstNode(original.getType(), original.getKey(), original.getValue());
@@ -63,6 +67,7 @@ public class AstNode {
         copy.setAnchor(original.getAnchor());
         copy.setPointer(original.getPointer());
         copy.setArrayIndex(original.getArrayIndex());
+        copy.setArraySize(original.getArraySize());
         original.getChildren().forEach(copy::addChild);
         return copy;
     }
@@ -138,16 +143,24 @@ public class AstNode {
         return value;
     }
 
-    public void setArrayIndex (Integer arrayIndex) {
+    public void setArrayIndex (@Nullable Integer arrayIndex) {
         this.arrayIndex = arrayIndex;
     }
 
-    public Integer getArrayIndex () {
+    public @Nullable Integer getArrayIndex () {
         return arrayIndex;
     }
 
     public boolean isArrayItem () {
         return arrayIndex != null;
+    }
+
+    public void setArraySize(@Nullable Integer size) {
+        this.arraySize = size;
+    }
+
+    public @Nullable Integer getArraySize () {
+        return arraySize;
     }
 
     @Override
@@ -161,6 +174,8 @@ public class AstNode {
         if (getKey() != null) sb.append(" key=").append(getKey());
 
         if (isArrayItem()) sb.append(" array-index=").append(getArrayIndex());
+
+        if (getArraySize() != null) sb.append(" array-size=").append(getArraySize());
 
         // value if scalar
         if (getValue() != null) {

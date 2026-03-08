@@ -12,19 +12,23 @@ import java.util.Deque;
 
 public class JsonParserAdapter implements FormatParser {
 
+    private final JsonFactory factory = new JsonFactory();
+
+    private final Deque<AstNode> stack = new ArrayDeque<>();
+    private final Deque<String> pointerStack = new ArrayDeque<>();
+    private final Deque<Integer> arrayIndexStack = new ArrayDeque<>();
+    private final Deque<Boolean> inArrayStack = new ArrayDeque<>();
+
+    private AstNode root = null;
+    private String currentField = null;
+
+    public JsonParserAdapter() {
+
+    }
+
     @Override
     public AstNode parse(String text) throws IOException {
-
-        JsonFactory factory = new JsonFactory();
         JsonParser parser = factory.createParser(text);
-
-        Deque<AstNode> stack = new ArrayDeque<>();
-        Deque<String> pointerStack = new ArrayDeque<>();
-        Deque<Integer> arrayIndexStack = new ArrayDeque<>();
-        Deque<Boolean> inArrayStack = new ArrayDeque<>();
-
-        AstNode root = null;
-        String currentField = null;
 
         pointerStack.push("$");
 
@@ -39,29 +43,34 @@ public class JsonParserAdapter implements FormatParser {
             switch (token) {
 
                 case START_OBJECT: {
-
+                    // create new OBJECT node
                     AstNode obj = new AstNode(
-                            AstNode.Type.OBJECT,
-                            currentField,
-                            null
+                        AstNode.Type.OBJECT,
+                        currentField,
+                        null
                     );
 
+                    // set start location of node
                     setStart(obj, startLoc);
-                    setPointer(obj, pointerStack);
 
-                    if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek())) setArrayIndex(obj, arrayIndexStack);
+                    // start as array item (if part of an array)
+                    startArrayItem(obj);
 
-                    attach(stack, obj);
+                    // add current fieldname (property) or a dummy value
+                    pointerStack.push(currentField != null ? currentField : "");
+
+                    // add current pointer to node
+                    setPointer(obj);
+
+                    attachToParent(obj);
                     stack.push(obj);
 
                     if (root == null)
                         root = obj;
 
-                    if (currentField != null)
-                        pointerStack.push(currentField);
-
                     currentField = null;
 
+                    // add indicator that current depth is not an array
                     inArrayStack.push(false);
 
                     break;
@@ -73,39 +82,38 @@ public class JsonParserAdapter implements FormatParser {
                     AstNode obj = stack.pop();
                     setEnd(obj, endLoc);
 
+                    finishArrayItem();
+
                     if (!pointerStack.isEmpty())
                         pointerStack.pop();
 
-                    if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek())) incrementArrayIndex(arrayIndexStack);
-
                     if (!stack.isEmpty() &&
-                            stack.peek().getType() == AstNode.Type.PROPERTY) {
+                        stack.peek().getType() == AstNode.Type.PROPERTY) {
                         stack.pop();
                     }
-
-
 
                     break;
                 }
 
                 case START_ARRAY: {
                     AstNode arr = new AstNode(
-                            AstNode.Type.ARRAY,
-                            currentField,
-                            null
+                        AstNode.Type.ARRAY,
+                        currentField,
+                        null
                     );
 
                     setStart(arr, startLoc);
-                    setPointer(arr, pointerStack);
-                    if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek())) setArrayIndex(arr, arrayIndexStack);
 
-                    attach(stack, arr);
+                    startArrayItem(arr);
+                    pointerStack.push(currentField != null ? currentField : "");
+
+                    setPointer(arr);
+
+                    attachToParent(arr);
+                    
                     stack.push(arr);
 
                     arrayIndexStack.push(0);
-
-                    if (currentField != null)
-                        pointerStack.push(currentField);
 
                     currentField = null;
 
@@ -119,20 +127,21 @@ public class JsonParserAdapter implements FormatParser {
                     AstNode arr = stack.pop();
                     setEnd(arr, endLoc);
 
-                    arrayIndexStack.pop();
+                    arr.setArraySize(arrayIndexStack.peek());
+
+                    // current array is ending so remove latest arrayIndex counter and latest array status indication
+                    arrayIndexStack.removeFirst();
                     inArrayStack.removeFirst();
+
+                    finishArrayItem();
 
                     if (!pointerStack.isEmpty())
                         pointerStack.pop();
 
-                    if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek())) incrementArrayIndex(arrayIndexStack);
-
                     if (!stack.isEmpty() &&
-                            stack.peek().getType() == AstNode.Type.PROPERTY) {
+                        stack.peek().getType() == AstNode.Type.PROPERTY) {
                         stack.pop();
                     }
-
-
 
                     break;
                 }
@@ -142,15 +151,15 @@ public class JsonParserAdapter implements FormatParser {
                     currentField = parser.getCurrentName();
 
                     AstNode prop = new AstNode(
-                            AstNode.Type.PROPERTY,
-                            currentField,
-                            null
+                        AstNode.Type.PROPERTY,
+                        currentField,
+                        null
                     );
 
                     setStart(prop, startLoc);
                     setEnd(prop, endLoc);
 
-                    attach(stack, prop);
+                    attachToParent(prop);
                     stack.push(prop);
 
                     break;
@@ -159,40 +168,32 @@ public class JsonParserAdapter implements FormatParser {
                 default: { // scalar values
 
                     AstNode valueNode = new AstNode(
-                            AstNode.Type.VALUE,
-                            null,
-                            parser.getValueAsString()
+                        AstNode.Type.VALUE,
+                        null,
+                        parser.getValueAsString()
                     );
 
                     setStart(valueNode, startLoc);
                     setEnd(valueNode, endLoc);
-
-                    if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek())) setArrayIndex(valueNode, arrayIndexStack);
-
                     detectValueType(valueNode, token);
 
-                    if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek()) && !arrayIndexStack.isEmpty()) {
-                        int index = arrayIndexStack.peek();
-                        pointerStack.push(String.valueOf(index));
-                    } else {
-                        if (currentField != null) pointerStack.push(currentField);
-                        currentField = null;
-                    }
+                    startArrayItem(valueNode);
 
-                    setPointer(valueNode, pointerStack);
+                    if (currentField != null) pointerStack.push(currentField);
 
-                    attach(stack, valueNode);
 
-                    if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek()) && !arrayIndexStack.isEmpty()) {
-                        pointerStack.pop();
-                        incrementArrayIndex(arrayIndexStack);
-                    } else {
-                        if (!pointerStack.isEmpty()) pointerStack.removeFirst();
-                    }
+                    setPointer(valueNode);
 
-                    if (!stack.isEmpty() &&
-                            stack.peek().getType() == AstNode.Type.PROPERTY) {
+                    attachToParent(valueNode);
 
+                    finishArrayItem();
+
+                    if (currentField != null && !pointerStack.isEmpty())
+                        pointerStack.removeFirst();
+
+                    currentField = null;
+
+                    if (!stack.isEmpty() && stack.peek().getType() == AstNode.Type.PROPERTY) {
                         AstNode prop = stack.pop();
                         setEnd(prop, endLoc);
                     }
@@ -206,7 +207,22 @@ public class JsonParserAdapter implements FormatParser {
         return root;
     }
 
-    private void attach(Deque<AstNode> stack, AstNode node) {
+    private void startArrayItem(AstNode node) {
+        if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek()) && !arrayIndexStack.isEmpty()) {
+            setArrayIndex(node);
+            int index = arrayIndexStack.peek();
+            pointerStack.push(String.valueOf(index));
+        }
+    }
+
+    private void finishArrayItem() {
+        if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek()) && !arrayIndexStack.isEmpty()) {
+            if (!pointerStack.isEmpty()) pointerStack.removeFirst();
+            incrementArrayIndex();
+        }
+    }
+
+    private void attachToParent(AstNode node) {
         if (!stack.isEmpty()) {
             stack.peek().addChild(node);
         }
@@ -226,13 +242,13 @@ public class JsonParserAdapter implements FormatParser {
         node.endColumn = loc.getColumnNr();
     }
 
-    private void setArrayIndex(AstNode node, Deque<Integer> arrayIndexStack) {
+    private void setArrayIndex(AstNode node) {
         if (!arrayIndexStack.isEmpty()) {
             node.setArrayIndex(arrayIndexStack.peek());
         }
     }
 
-    private void setPointer(AstNode node, Deque<String> pointerStack) {
+    private void setPointer(AstNode node) {
 
         if (pointerStack.size() == 1) {
             node.setPointer(pointerStack.getFirst()); // root node
@@ -246,6 +262,9 @@ public class JsonParserAdapter implements FormatParser {
 
         for (int i = arr.length - 1; i >= 0; i--) {
             String field = arr[i];
+
+            if (field.isEmpty()) continue;
+
             if (field.contains(".")) field = "\"" + field + "\"";
             sb.append(field);
             if (i > 0) {
@@ -256,7 +275,7 @@ public class JsonParserAdapter implements FormatParser {
         node.setPointer(sb.toString());
     }
 
-    private void incrementArrayIndex(Deque<Integer> arrayIndexStack) {
+    private void incrementArrayIndex() {
 
         if (!arrayIndexStack.isEmpty()) {
 

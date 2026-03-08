@@ -29,8 +29,6 @@ public class JsonTreeView extends TreeView<AstNode> {
 
     private final EditorDocument editorDocument;
 
-    private final FormatParser jsonParser = new JsonParserAdapter();
-
     private final FormatParser yamlParser = new YamlParserAdapter();
 
     private final AstTreeBuilder astTreeBuilder = new AstTreeBuilder();
@@ -111,7 +109,7 @@ public class JsonTreeView extends TreeView<AstNode> {
         try {
             AstNode root;
             if (editorDocument.getEditorMode() == EditorMode.JSON) {
-                root = jsonParser.parse(text);
+                root = new JsonParserAdapter().parse(text);
             } else {
                 root = yamlParser.parse(text);
             }
@@ -140,7 +138,7 @@ public class JsonTreeView extends TreeView<AstNode> {
                 });
             }
         } catch (Exception e) {
-            System.err.println(e);
+            LOGGER.error("Failed to refresh tree", e);
         }
     }
 

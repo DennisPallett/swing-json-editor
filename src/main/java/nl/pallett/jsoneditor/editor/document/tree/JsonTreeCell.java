@@ -96,7 +96,8 @@ public class JsonTreeCell extends TreeCell<AstNode> {
                 setGraphic(new Label("🟣"));
             }
             case ARRAY -> {
-                text += item.getKey() + " [ ]";
+                text += item.getKey() != null ? item.getKey() : "";
+                text += " [" + item.getArraySize() + "]";
                 setText(text);
                 getStyleClass().add("json-array");
             }
