@@ -32,7 +32,7 @@ public class AstNode {
 
     private String key;
     private String value;
-    private String pointer;
+    private List<PointerType> pointer;
 
     public int startOffset;
     public int endOffset;
@@ -91,11 +91,11 @@ public class AstNode {
         return type;
     }
 
-    public void setPointer(String pointer) {
-        this.pointer = pointer;
+    public void setPointer(List<PointerType> pointerList) {
+        this.pointer = pointerList;
     }
 
-    public String getPointer() {
+    public List<PointerType> getPointer() {
         return pointer;
     }
 
@@ -163,6 +163,27 @@ public class AstNode {
         return arraySize;
     }
 
+    public String getPointerAsJsonPath() {
+        List<PointerType> filtered = this.pointer.stream()
+            .filter(p -> !(p instanceof NullPointer))
+            .toList();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(((FieldPointer)filtered.getFirst()).fieldName()); // root node
+
+        for(int i=1; i < filtered.size(); i++) {
+            PointerType currPointer = filtered.get(i);
+
+            if (currPointer instanceof ArrayIndexPointer(int index)) {
+                sb.append("[").append(index).append("]");
+            } else if (currPointer instanceof FieldPointer(String fieldName)) {
+                sb.append(".").append(fieldName);
+            }
+        }
+
+        return sb.toString();
+    }
+
     @Override
     public String toString () {
         StringBuilder sb = new StringBuilder();
@@ -184,7 +205,7 @@ public class AstNode {
         }
 
         if (getPointer() != null) {
-            sb.append(" pointer=").append(getPointer());
+            sb.append(" pointer=").append(getPointerAsJsonPath());
         }
 
         // YAML-specific info

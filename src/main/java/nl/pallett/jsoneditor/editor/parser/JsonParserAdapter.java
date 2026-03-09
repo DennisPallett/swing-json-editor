@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import nl.pallett.jsoneditor.editor.ast.ArrayIndexPointer;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
+import nl.pallett.jsoneditor.editor.ast.FieldPointer;
+import nl.pallett.jsoneditor.editor.ast.PointerType;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -15,7 +18,7 @@ public class JsonParserAdapter implements FormatParser {
     private final JsonFactory factory = new JsonFactory();
 
     private final Deque<AstNode> stack = new ArrayDeque<>();
-    private final Deque<String> pointerStack = new ArrayDeque<>();
+    private final Deque<PointerType> pointerStack = new ArrayDeque<>();
     private final Deque<Integer> arrayIndexStack = new ArrayDeque<>();
     private final Deque<Boolean> inArrayStack = new ArrayDeque<>();
 
@@ -30,15 +33,15 @@ public class JsonParserAdapter implements FormatParser {
     public AstNode parse(String text) throws IOException {
         JsonParser parser = factory.createParser(text);
 
-        pointerStack.push("$");
+        pointerStack.push(new FieldPointer("$"));
 
         while (true) {
 
             JsonToken token = parser.nextToken();
             if (token == null) break;
 
-            JsonLocation startLoc = parser.getTokenLocation();
-            JsonLocation endLoc = parser.getCurrentLocation();
+            JsonLocation startLoc = parser.currentTokenLocation();
+            JsonLocation endLoc = parser.currentLocation();
 
             switch (token) {
 
@@ -57,7 +60,7 @@ public class JsonParserAdapter implements FormatParser {
                     startArrayItem(obj);
 
                     // add current fieldname (property) or a dummy value
-                    pointerStack.push(currentField != null ? currentField : "");
+                    pointerStack.push(PointerType.fieldOrNullPointer(currentField));
 
                     // add current pointer to node
                     setPointer(obj);
@@ -105,12 +108,12 @@ public class JsonParserAdapter implements FormatParser {
                     setStart(arr, startLoc);
 
                     startArrayItem(arr);
-                    pointerStack.push(currentField != null ? currentField : "");
+                    pointerStack.push(PointerType.fieldOrNullPointer(currentField));
 
                     setPointer(arr);
 
                     attachToParent(arr);
-                    
+
                     stack.push(arr);
 
                     arrayIndexStack.push(0);
@@ -148,7 +151,7 @@ public class JsonParserAdapter implements FormatParser {
 
                 case FIELD_NAME: {
 
-                    currentField = parser.getCurrentName();
+                    currentField = parser.currentName() ;
 
                     AstNode prop = new AstNode(
                         AstNode.Type.PROPERTY,
@@ -179,7 +182,7 @@ public class JsonParserAdapter implements FormatParser {
 
                     startArrayItem(valueNode);
 
-                    if (currentField != null) pointerStack.push(currentField);
+                    if (currentField != null) pointerStack.push(new FieldPointer(currentField));
 
 
                     setPointer(valueNode);
@@ -211,7 +214,7 @@ public class JsonParserAdapter implements FormatParser {
         if (!inArrayStack.isEmpty() && Boolean.TRUE.equals(inArrayStack.peek()) && !arrayIndexStack.isEmpty()) {
             setArrayIndex(node);
             int index = arrayIndexStack.peek();
-            pointerStack.push(String.valueOf(index));
+            pointerStack.push(new ArrayIndexPointer(index));
         }
     }
 
@@ -249,30 +252,7 @@ public class JsonParserAdapter implements FormatParser {
     }
 
     private void setPointer(AstNode node) {
-
-        if (pointerStack.size() == 1) {
-            node.setPointer(pointerStack.getFirst()); // root node
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-
-        String[] arr = new String[pointerStack.size()];
-        arr = pointerStack.toArray(arr);
-
-        for (int i = arr.length - 1; i >= 0; i--) {
-            String field = arr[i];
-
-            if (field.isEmpty()) continue;
-
-            if (field.contains(".")) field = "\"" + field + "\"";
-            sb.append(field);
-            if (i > 0) {
-                sb.append(".");
-            }
-        }
-
-        node.setPointer(sb.toString());
+        node.setPointer(pointerStack.stream().toList().reversed());
     }
 
     private void incrementArrayIndex() {

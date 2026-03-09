@@ -146,7 +146,7 @@ public class JsonTreeCell extends TreeCell<AstNode> {
         copyPathItem.setOnAction(e -> {
             TreeItem<AstNode> treeItem = getTreeItem();
             if (treeItem != null) {
-                ClipboardUtil.copyToClipboard(treeItem.getValue().getPointer());
+                ClipboardUtil.copyToClipboard(treeItem.getValue().getPointerAsJsonPath());
             }
         });
 
