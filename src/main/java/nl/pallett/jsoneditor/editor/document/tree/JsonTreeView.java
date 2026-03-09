@@ -9,8 +9,8 @@ import nl.pallett.jsoneditor.editor.EditorMode;
 import nl.pallett.jsoneditor.editor.ast.AstIntervalIndex;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.ast.AstPrinter;
+import nl.pallett.jsoneditor.editor.ast.PointerType;
 import nl.pallett.jsoneditor.editor.document.EditorDocument;
-import nl.pallett.jsoneditor.editor.document.JsonPath;
 import nl.pallett.jsoneditor.editor.parser.FormatParser;
 import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
 import nl.pallett.jsoneditor.editor.parser.YamlParserAdapter;
@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class JsonTreeView extends TreeView<AstNode> {
@@ -107,6 +108,14 @@ public class JsonTreeView extends TreeView<AstNode> {
 
     public void refreshJsonTree(String text) {
         try {
+            Set<List<PointerType>> expanded;
+
+            if (getRoot() != null) {
+                expanded = captureExpandedPaths(getRoot());
+            } else {
+                expanded = new HashSet<>();
+            }
+
             AstNode root;
             if (editorDocument.getEditorMode() == EditorMode.JSON) {
                 root = new JsonParserAdapter().parse(text);
@@ -135,7 +144,11 @@ public class JsonTreeView extends TreeView<AstNode> {
                         TreeViewUtil.setExpandedAtLevel(rootItem, 1, true);
                         TreeViewUtil.setExpandedAtLevel(rootItem, 2, true);
                     }
+
+                    restoreExpandedPaths(rootItem, expanded);
                 });
+
+
             }
         } catch (Exception e) {
             LOGGER.error("Failed to refresh tree", e);
@@ -192,30 +205,30 @@ public class JsonTreeView extends TreeView<AstNode> {
         return null;
     }
 
-    private Set<JsonPath> captureExpandedPaths(TreeItem<JsonTreeNode> root) {
-        Set<JsonPath> expanded = new HashSet<>();
+    private Set<List<PointerType>> captureExpandedPaths(TreeItem<AstNode> root) {
+        Set<List<PointerType>> expanded = new HashSet<>();
         captureExpanded(root, expanded);
         return expanded;
     }
 
-    private void captureExpanded(TreeItem<JsonTreeNode> item, Set<JsonPath> expanded) {
+    private void captureExpanded(TreeItem<AstNode> item, Set<List<PointerType>> expanded) {
         if (item.isExpanded()) {
-            expanded.add(item.getValue().getPath());
+            expanded.add(item.getValue().getPointer());
         }
-        for (TreeItem<JsonTreeNode> child : item.getChildren()) {
+        for (TreeItem<AstNode> child : item.getChildren()) {
             captureExpanded(child, expanded);
         }
     }
 
-    private void restoreExpandedPaths(TreeItem<JsonTreeNode> root, Set<JsonPath> expanded) {
+    private void restoreExpandedPaths(TreeItem<AstNode> root, Set<List<PointerType>> expanded) {
         restoreExpanded(root, expanded);
     }
 
-    private void restoreExpanded(TreeItem<JsonTreeNode> item, Set<JsonPath> expanded) {
-        if (expanded.contains(item.getValue().getPath())) {
+    private void restoreExpanded(TreeItem<AstNode> item, Set<List<PointerType>> expanded) {
+        if (expanded.contains(item.getValue().getPointer())) {
             item.setExpanded(true);
         }
-        for (TreeItem<JsonTreeNode> child : item.getChildren()) {
+        for (TreeItem<AstNode> child : item.getChildren()) {
             restoreExpanded(child, expanded);
         }
     }
