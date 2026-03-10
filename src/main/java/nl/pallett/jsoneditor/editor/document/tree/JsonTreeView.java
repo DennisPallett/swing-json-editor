@@ -1,23 +1,40 @@
 package nl.pallett.jsoneditor.editor.document.tree;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import javafx.application.Platform;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import nl.pallett.jsoneditor.editor.EditorMode;
+import nl.pallett.jsoneditor.editor.ast.AstIntervalIndex;
+import nl.pallett.jsoneditor.editor.ast.AstNode;
+import nl.pallett.jsoneditor.editor.ast.AstPrinter;
+import nl.pallett.jsoneditor.editor.ast.PointerType;
 import nl.pallett.jsoneditor.editor.document.EditorDocument;
-import nl.pallett.jsoneditor.editor.document.JsonPath;
-import nl.pallett.jsoneditor.util.ObjectMapperUtil;
-import org.jspecify.annotations.Nullable;
+import nl.pallett.jsoneditor.editor.parser.FormatParser;
+import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
+import nl.pallett.jsoneditor.editor.parser.YamlParserAdapter;
+import nl.pallett.jsoneditor.util.TreeViewUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class JsonTreeView extends TreeView<JsonTreeNode> {
+public class JsonTreeView extends TreeView<AstNode> {
 
-    private TreeItem<JsonTreeNode> unfilteredFullRoot;
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonTreeView.class);
+
+    private TreeItem<AstNode> unfilteredFullRoot;
 
     private final EditorDocument editorDocument;
+
+    private final FormatParser yamlParser = new YamlParserAdapter();
+
+    private final AstTreeBuilder astTreeBuilder = new AstTreeBuilder();
+
+    private AstIntervalIndex astIntervalIndex;
 
     public JsonTreeView(EditorDocument document) {
         super();
@@ -25,14 +42,6 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
 
         setShowRoot(false);
         setCellFactory(tv -> new JsonTreeCell(this));
-
-        getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, oldItem, newItem) -> {
-                    if (newItem != null) {
-                        document.scrollToJsonPath(newItem.getValue());
-                    }
-                });
 
         createContextMenu();
     }
@@ -57,26 +66,92 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         }
     }
 
-    public void refreshJsonTree(String json) {
+    public void selectAndReveal(AstNode node) {
+        TreeItem<AstNode> item = astIntervalIndex.getTreeItemForNode(node);
+        if (item == null) {
+            return;
+        }
+
+        // Expand all parents
+        TreeItem<AstNode> parent = item.getParent();
+        while (parent != null) {
+            parent.setExpanded(true);
+            parent = parent.getParent();
+        }
+
+        // Select the item
+        getSelectionModel().select(item);
+
+        // Scroll to it after layout updates
+        Platform.runLater(() -> {
+            int row = getRow(item);
+            if (row >= 0) {
+                scrollTo(row);
+                getFocusModel().focus(row);
+            }
+        });
+    }
+
+    public void selectTreeItemForCaretPosition(int caretPosition) {
+        if (astIntervalIndex != null) {
+            LOGGER.debug("Looking for: {}", caretPosition);
+
+            AstNode node = astIntervalIndex.findDeepest(caretPosition);
+
+            LOGGER.debug("Node to select: {}", node);
+
+            if (node != null) {
+                selectAndReveal(node);
+            }
+        }
+    }
+
+    public void refreshJsonTree(String text) {
         try {
-            Set<JsonPath> expanded = new HashSet<>();
+            Set<List<PointerType>> expanded;
 
             if (getRoot() != null) {
                 expanded = captureExpandedPaths(getRoot());
+            } else {
+                expanded = new HashSet<>();
             }
 
-            JsonNode node = ObjectMapperUtil.getInstance(editorDocument.getEditorMode()).readTree(json);
+            AstNode root;
+            if (editorDocument.getEditorMode() == EditorMode.JSON) {
+                root = new JsonParserAdapter().parse(text);
+            } else {
+                root = new YamlParserAdapter().parse(text);
+            }
 
-            TreeItem<JsonTreeNode> newRoot =
-                    buildTree(node, "root", null);
+            if (root != null) {
+                // log the full AST
+                if (LOGGER.isDebugEnabled()) {
+                    AstPrinter.logAst(log -> LOGGER.debug("AST tree:\n{}", log), root);
+                }
 
-            setRoot(newRoot);
-            unfilteredFullRoot = getRoot();
+                TreeItem<AstNode> rootItem = astTreeBuilder.buildTree(root);
+                astIntervalIndex = new AstIntervalIndex(rootItem);
+                setRoot(rootItem);
 
-            restoreExpandedPaths(newRoot, expanded);
+                unfilteredFullRoot = rootItem;
 
-        } catch (Exception ignored) {
-            // invalid JSON
+                // initial state of tree is somewhat collapsed to prevent node overload
+                Platform.runLater(() -> {
+                    collapseAll(rootItem);
+
+                    // for YAML we show 2 more levels
+                    if (editorDocument.getEditorMode() == EditorMode.YAML) {
+                        TreeViewUtil.setExpandedAtLevel(rootItem, 1, true);
+                        TreeViewUtil.setExpandedAtLevel(rootItem, 2, true);
+                    }
+
+                    restoreExpandedPaths(rootItem, expanded);
+                });
+
+
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to refresh tree", e);
         }
     }
 
@@ -84,7 +159,7 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         if (value == null || value.isBlank()) {
             setRoot(unfilteredFullRoot);
         } else {
-            TreeItem<JsonTreeNode> filteredRoot =
+            TreeItem<AstNode> filteredRoot =
                     filterTree(unfilteredFullRoot, value.toLowerCase());
             setRoot(filteredRoot);
         }
@@ -102,14 +177,14 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         setContextMenu(contextMenu);
     }
 
-    private TreeItem<JsonTreeNode> filterTree(TreeItem<JsonTreeNode> source, String filter) {
+    private TreeItem<AstNode> filterTree(TreeItem<AstNode> source, String filter) {
 
         if (source == null) return null;
 
-        TreeItem<JsonTreeNode> filteredItem = new TreeItem<>(source.getValue());
+        TreeItem<AstNode> filteredItem = new TreeItem<>(source.getValue());
 
-        for (TreeItem<JsonTreeNode> child : source.getChildren()) {
-            TreeItem<JsonTreeNode> filteredChild = filterTree(child, filter);
+        for (TreeItem<AstNode> child : source.getChildren()) {
+            TreeItem<AstNode> filteredChild = filterTree(child, filter);
             if (filteredChild != null) {
                 filteredItem.getChildren().add(filteredChild);
             }
@@ -130,72 +205,32 @@ public class JsonTreeView extends TreeView<JsonTreeNode> {
         return null;
     }
 
-    private Set<JsonPath> captureExpandedPaths(TreeItem<JsonTreeNode> root) {
-        Set<JsonPath> expanded = new HashSet<>();
+    private Set<List<PointerType>> captureExpandedPaths(TreeItem<AstNode> root) {
+        Set<List<PointerType>> expanded = new HashSet<>();
         captureExpanded(root, expanded);
         return expanded;
     }
 
-    private void captureExpanded(TreeItem<JsonTreeNode> item, Set<JsonPath> expanded) {
+    private void captureExpanded(TreeItem<AstNode> item, Set<List<PointerType>> expanded) {
         if (item.isExpanded()) {
-            expanded.add(item.getValue().getPath());
+            expanded.add(item.getValue().getPointer());
         }
-        for (TreeItem<JsonTreeNode> child : item.getChildren()) {
+        for (TreeItem<AstNode> child : item.getChildren()) {
             captureExpanded(child, expanded);
         }
     }
 
-    private void restoreExpandedPaths(TreeItem<JsonTreeNode> root, Set<JsonPath> expanded) {
+    private void restoreExpandedPaths(TreeItem<AstNode> root, Set<List<PointerType>> expanded) {
         restoreExpanded(root, expanded);
     }
 
-    private void restoreExpanded(TreeItem<JsonTreeNode> item, Set<JsonPath> expanded) {
-        if (expanded.contains(item.getValue().getPath())) {
+    private void restoreExpanded(TreeItem<AstNode> item, Set<List<PointerType>> expanded) {
+        if (expanded.contains(item.getValue().getPointer())) {
             item.setExpanded(true);
         }
-        for (TreeItem<JsonTreeNode> child : item.getChildren()) {
+        for (TreeItem<AstNode> child : item.getChildren()) {
             restoreExpanded(child, expanded);
         }
-    }
-
-    private TreeItem<JsonTreeNode> buildTree(JsonNode node, String key, @Nullable JsonPath parentPath) {
-        JsonPath currentPath = new JsonPath(parentPath, key);
-
-        JsonTreeNode.Type type;
-
-        if (node.isObject()) {
-            TreeItem<JsonTreeNode> item =
-                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.OBJECT, currentPath, node));
-
-            node.fieldNames().forEachRemaining(field ->
-                    item.getChildren().add(
-                            buildTree(node.get(field), field, currentPath)
-                    )
-            );
-            return item;
-        }
-
-        if (node.isArray()) {
-            TreeItem<JsonTreeNode> item =
-                    new TreeItem<>(new JsonTreeNode(key, null, JsonTreeNode.Type.ARRAY, currentPath, node));
-
-            for (int i = 0; i < node.size(); i++) {
-                item.getChildren().add(
-                        buildTree(node.get(i), "[" + i + "]", currentPath)
-                );
-            }
-            return item;
-        }
-
-        // value node
-        if (node.isTextual()) type = JsonTreeNode.Type.STRING;
-        else if (node.isNumber()) type = JsonTreeNode.Type.NUMBER;
-        else if (node.isBoolean()) type = JsonTreeNode.Type.BOOLEAN;
-        else type = JsonTreeNode.Type.NULL;
-
-        return new TreeItem<>(
-                new JsonTreeNode(key, node.asText(), type, currentPath, node)
-        );
     }
 
     public EditorDocument getEditorDocument () {

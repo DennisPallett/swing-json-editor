@@ -1,7 +1,6 @@
 package nl.pallett.jsoneditor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import nl.pallett.jsoneditor.editor.EditorMode;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
@@ -28,19 +27,22 @@ public class StringUtil {
         return line.substring(0, i);
     }
 
-    public static String formatCode(EditorMode editorMode, JsonNode node) throws JsonProcessingException {
-        String prettyCode = ObjectMapperUtil.getInstance(editorMode)
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(node);
-
+    public static String formatCode(EditorMode editorMode, String content) throws JsonProcessingException {
         if (editorMode == EditorMode.YAML) {
-            return formatYaml(prettyCode);
+            return formatYaml(content);
         } else {
-            return prettyCode;
+            return formatJson(content);
         }
     }
 
-    public static String formatYaml(String input) {
+    public static String formatJson(String jsonString) throws JsonProcessingException {
+        var objectMapper = ObjectMapperUtil.getJsonInstance();
+        Object object = objectMapper.readValue(jsonString, Object.class);
+        return objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(object);
+    }
+
+    public static String formatYaml(String yamlString) {
 
         // 1️⃣ Parse to Node tree with comments
         LoadSettings loadSettings = LoadSettings.builder()
@@ -48,7 +50,7 @@ public class StringUtil {
                 .build();
 
         Compose compose = new Compose(loadSettings);
-        Optional<Node> node = compose.composeReader(new StringReader(input));
+        Optional<Node> node = compose.composeReader(new StringReader(yamlString));
 
         // 2️⃣ Dump Node while preserving comments
         DumpSettings dumpSettings = DumpSettings.builder()
