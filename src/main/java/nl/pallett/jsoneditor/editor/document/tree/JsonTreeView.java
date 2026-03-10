@@ -120,7 +120,7 @@ public class JsonTreeView extends TreeView<AstNode> {
             if (editorDocument.getEditorMode() == EditorMode.JSON) {
                 root = new JsonParserAdapter().parse(text);
             } else {
-                root = yamlParser.parse(text);
+                root = new YamlParserAdapter().parse(text);
             }
 
             if (root != null) {

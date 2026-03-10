@@ -2,6 +2,7 @@ package nl.pallett.jsoneditor.editor.document.tree;
 
 import javafx.scene.control.TreeItem;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
+import org.jspecify.annotations.Nullable;
 
 public class AstTreeBuilder {
 
@@ -9,7 +10,7 @@ public class AstTreeBuilder {
         return buildFlat(root);
     }
 
-    private TreeItem<AstNode> buildFlat(AstNode node) {
+    private @Nullable TreeItem<AstNode> buildFlat(AstNode node) {
 
         TreeItem<AstNode> item;
 
@@ -50,6 +51,9 @@ public class AstTreeBuilder {
 
             node = combined;
             item = new TreeItem<>(node);
+        } else if (node.getType() == AstNode.Type.COMMENT && AstNode.CommentType.BLOCK != node.getCommentType()) {
+            // skip comments except actual block comments
+            return null;
         } else {
             item = new TreeItem<>(node);
         }
@@ -61,7 +65,10 @@ public class AstTreeBuilder {
                     child.getType() == AstNode.Type.VALUE)
                 continue;
 
-            item.getChildren().add(buildFlat(child));
+            TreeItem<AstNode> childTreeItem = buildFlat(child);
+            if (childTreeItem != null) {
+                item.getChildren().add(buildFlat(child));
+            }
         }
 
         item.setExpanded(true);

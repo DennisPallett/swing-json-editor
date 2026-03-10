@@ -27,6 +27,21 @@ public class AstNode {
         TIMESTAMP
     }
 
+    public enum CommentType {
+        /**
+         * empty line
+         */
+        BLANK_LINE,
+        /**
+         * comment which start with #
+         */
+        BLOCK,
+        /**
+         * ending the line
+         */
+        IN_LINE
+    }
+
     private Type type;
     private ValueType valueType;
 
@@ -47,6 +62,8 @@ public class AstNode {
 
     private String anchor;
     private String alias;
+
+    private @Nullable CommentType commentType;
 
     private final List<AstNode> children = new ArrayList<>();
 
@@ -163,6 +180,14 @@ public class AstNode {
         return arraySize;
     }
 
+    public void setCommentType (CommentType commentType) {
+        this.commentType = commentType;
+    }
+
+    public @Nullable CommentType getCommentType () {
+        return commentType;
+    }
+
     public String getPointerAsJsonPath() {
         List<PointerType> filtered = this.pointer.stream()
             .filter(p -> !(p instanceof NullPointer))
@@ -201,8 +226,17 @@ public class AstNode {
         // value if scalar
         if (getValue() != null) {
             sb.append(" value=").append(getValue());
+
+        }
+
+        if (getValueType() != null) {
             sb.append(" (").append(getValueType()).append(")");
         }
+
+        if (getCommentType() != null) {
+            sb.append(" (").append(getCommentType()).append(")");
+        }
+
 
         if (getPointer() != null) {
             sb.append(" pointer=").append(getPointerAsJsonPath());
