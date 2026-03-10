@@ -188,6 +188,10 @@ public class AstNode {
         return commentType;
     }
 
+    public boolean hasPointer() {
+        return this.pointer != null && !this.pointer.isEmpty();
+    }
+
     public String getPointerAsJsonPath() {
         List<PointerType> filtered = this.pointer.stream()
             .filter(p -> !(p instanceof NullPointer))

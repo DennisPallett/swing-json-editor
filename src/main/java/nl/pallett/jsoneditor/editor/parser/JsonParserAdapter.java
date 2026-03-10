@@ -113,7 +113,6 @@ public class JsonParserAdapter implements FormatParser {
                     setPointer(arr);
 
                     attachToParent(arr);
-
                     stack.push(arr);
 
                     arrayIndexStack.push(0);
@@ -183,7 +182,6 @@ public class JsonParserAdapter implements FormatParser {
                     startArrayItem(valueNode);
 
                     if (currentField != null) pointerStack.push(new FieldPointer(currentField));
-
 
                     setPointer(valueNode);
 

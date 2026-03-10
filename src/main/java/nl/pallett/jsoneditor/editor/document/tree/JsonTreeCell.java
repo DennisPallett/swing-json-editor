@@ -126,6 +126,14 @@ public class JsonTreeCell extends TreeCell<AstNode> {
             treeView.getEditorDocument().getEditorModeProperty()))
         ;
 
+        copyPathItem.disableProperty().bind(
+            itemProperty().isNull()
+                .or(Bindings.createBooleanBinding(
+                    () -> getItem() != null && !getItem().hasPointer(),
+                    itemProperty()
+                ))
+        );
+
         MenuItem expandAllItem = new MenuItem("Expand All");
         MenuItem collapseAllItem = new MenuItem("Collapse All");
 
