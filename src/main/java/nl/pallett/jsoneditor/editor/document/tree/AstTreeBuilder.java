@@ -67,7 +67,7 @@ public class AstTreeBuilder {
 
             TreeItem<AstNode> childTreeItem = buildFlat(child);
             if (childTreeItem != null) {
-                item.getChildren().add(buildFlat(child));
+                item.getChildren().add(childTreeItem);
             }
         }
 
