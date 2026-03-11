@@ -25,11 +25,13 @@ public class SwingJsonEditorApp extends Application {
     private Stage stage;
 
     public static void main(String[] args) {
+        System.out.println("Yes2");
         launch(args);
     }
 
     @Override
     public void start(Stage stage) {
+        System.out.println("start");
         this.stage = stage;
 
         Parameters params = getParameters();
@@ -82,6 +84,7 @@ public class SwingJsonEditorApp extends Application {
 
     @Override
     public void init() {
+        System.out.println("init");
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
 
