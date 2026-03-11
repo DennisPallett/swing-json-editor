@@ -379,6 +379,31 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.panteleyev</groupId>
+        <artifactId>jpackage-maven-plugin</artifactId>
+        <version>1.7.2</version>
+
+        <executions>
+          <execution>
+            <id>build-installer</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jpackage</goal>
+            </goals>
+          </execution>
+        </executions>
+
+        <configuration>
+          <name>SwingJsonEditor</name>
+          <runtimeImage>${bld.runtimeImagesDirectory}</runtimeImage>
+          <module>nl.pallett.jsoneditor/nl.pallett.jsoneditor.SwingJsonEditorApp</module>
+          <destination>${project.build.directory}/dist</destination>
+          <type>APP_IMAGE</type>
+          <removeDestination>true</removeDestination>
+        </configuration>
+      </plugin>
   </plugins>
   </build>
 </project>
