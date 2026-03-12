@@ -396,12 +396,14 @@
         </executions>
 
         <configuration>
-          <name>SwingJsonEditor</name>
+          <name>Swing Json Editor</name>
           <runtimeImage>${bld.runtimeImagesDirectory}</runtimeImage>
           <module>nl.pallett.jsoneditor/nl.pallett.jsoneditor.SwingJsonEditorApp</module>
           <destination>${project.build.directory}/dist</destination>
           <type>APP_IMAGE</type>
           <removeDestination>true</removeDestination>
+          <macPackageName>Swing JSON Editor</macPackageName>
+          <icon>src/main/resources/icon/swing-icon.icns</icon>
         </configuration>
       </plugin>
   </plugins>
