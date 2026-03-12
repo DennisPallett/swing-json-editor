@@ -127,6 +127,12 @@
     </dependency>
 
     <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>5.13.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
@@ -224,6 +230,19 @@
               <outputDirectory>${bld.modulesDirectory}</outputDirectory>
               <overwriteExistingFiles>true</overwriteExistingFiles>
               <modules>
+                <module>
+                  <artifact>
+                    <groupId>net.java.dev.jna</groupId>
+                    <artifactId>jna</artifactId>
+                  </artifact>
+                  <moduleInfoSource>
+                    module com.sun.jna {
+                      requires java.logging;
+
+                      exports com.sun.jna;
+                    }
+                  </moduleInfoSource>
+                </module>
                 <module>
                   <artifact>
                     <groupId>org.reactfx</groupId>

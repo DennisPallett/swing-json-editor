@@ -20,6 +20,8 @@ module nl.pallett.jsoneditor {
 
     requires org.snakeyaml.engine.v2;
     requires org.yaml.snakeyaml;
+    requires javafx.graphics;
+    requires com.sun.jna;
 
     exports nl.pallett.jsoneditor;
 }

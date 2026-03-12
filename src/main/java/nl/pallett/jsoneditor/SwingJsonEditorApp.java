@@ -1,5 +1,7 @@
 package nl.pallett.jsoneditor;
 
+import java.awt.desktop.OpenFilesEvent;
+import java.util.Arrays;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -24,19 +26,38 @@ public class SwingJsonEditorApp extends Application {
 
     private Stage stage;
 
+
+
     public static void main(String[] args) {
         System.out.println("Yes2");
+
+        System.out.println("args: " + Arrays.toString(args));
+
+        //MacOSAppleEventListener.init();
+
+        // Install raw Apple Event listener
+        //RawAppleEventListener.install();
+
+        MacOSIntegration.init(args);
+
         launch(args);
     }
+
 
     @Override
     public void start(Stage stage) {
         System.out.println("start");
+
         this.stage = stage;
+
+        MacOSAppleEventListener.setFileOpenHandler(file -> {
+            System.out.println("open: " + file.getAbsolutePath());
+            editorManager.openDocument(file.toPath());
+        });
 
         Parameters params = getParameters();
         List<String> launchArgs = params.getRaw();
-        preventDuplicateInstances(launchArgs);
+        //preventDuplicateInstances(launchArgs);
 
         BorderPane root = new BorderPane();
         root.setCenter(editorManager.getTabPane());
@@ -76,6 +97,8 @@ public class SwingJsonEditorApp extends Application {
             }
         });
 
+        MacOSAppleEventListener.markJavaFXReady();
+
         // open application with an initial empty JSON document if no initial file has been opened
         if (!editorManager.anyOpenDocuments()) {
             editorManager.openDocument(null, "");
@@ -85,18 +108,20 @@ public class SwingJsonEditorApp extends Application {
     @Override
     public void init() {
         System.out.println("init");
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-
-            desktop.setOpenFileHandler(event -> {
-                for (File file : event.getFiles()) {
-                    Platform.runLater(() -> {
-                        editorManager.openDocument(file.toPath());
-                        bringToFront();
-                    });
-                }
-            });
-        }
+        // if (Desktop.isDesktopSupported()) {
+        //     Desktop desktop = Desktop.getDesktop();
+        //
+        //     desktop.setOpenFileHandler(event -> {
+        //         System.out.println("RECEIVED OPEN FILE EVENT");
+        //         for (File file : event.getFiles()) {
+        //             System.out.println("Opening file: " + file.getAbsolutePath());
+        //             Platform.runLater(() -> {
+        //                 editorManager.openDocument(file.toPath());
+        //                 bringToFront();
+        //             });
+        //         }
+        //     });
+        // }
 
 
     }
