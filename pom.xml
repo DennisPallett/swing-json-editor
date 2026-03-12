@@ -404,6 +404,7 @@
           <removeDestination>true</removeDestination>
           <macPackageName>Swing JSON Editor</macPackageName>
           <icon>src/main/resources/icon/swing-icon.icns</icon>
+          <fileAssociations>src/main/resources/file-associations/json-association.properties,src/main/resources/file-associations/yaml-association.properties,,src/main/resources/file-associations/yml-association.properties</fileAssociations>
         </configuration>
       </plugin>
   </plugins>
