@@ -1,130 +1,45 @@
 package nl.pallett.jsoneditor.editor;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import nl.pallett.jsoneditor.editor.document.EditorDocument;
-import org.fxmisc.richtext.CodeArea;
-import org.jspecify.annotations.Nullable;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.TransferHandler;
+import nl.pallett.jsoneditor.ui.editor.tabs.IDETab;
+import nl.pallett.jsoneditor.ui.editor.tabs.TabTransferHandler;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static nl.pallett.jsoneditor.SwingJsonEditorApp.showError;
-
-public class EditorManager {
-
-    private final TabPane tabPane = new TabPane();
-    private final Map<EditorTab, EditorDocument> openDocuments = new HashMap<>();
-    private final BooleanProperty activeDocumentAvailable = new SimpleBooleanProperty(false);
-
-    private final BooleanProperty undoAvailableProperty = new SimpleBooleanProperty(false);
-    private final BooleanProperty redoAvailableProperty = new SimpleBooleanProperty(false);
+public class EditorManager extends JTabbedPane {
 
     public EditorManager () {
-        tabPane.setTabMinWidth(80);
-        tabPane.setTabMaxWidth(160);
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
+        super();
 
-        tabPane.getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, oldTab, newTab) -> {
-                    if (newTab != null) {
-                        handleTabActivated(newTab);
-                    }
-                });
+        // Add sample tabs
+        addTab(this, "Dashboard");
+        addTab(this, "Settings");
+        addTab(this, "Logs");
+
+        enableTabReordering(this);
     }
 
-    private void handleTabActivated(Tab newTab) {
-        CodeArea activeEditor = getActiveEditor();
-
-        if (activeEditor != null) {
-            undoAvailableProperty.bind(activeEditor.undoAvailableProperty());
-            redoAvailableProperty.bind(activeEditor.redoAvailableProperty());
-        } else {
-            undoAvailableProperty.unbind();
-            redoAvailableProperty.unbind();
-
-            undoAvailableProperty.set(false);
-            redoAvailableProperty.set(false);
-        }
+    private static void addTab(JTabbedPane tabbedPane, String title) {
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Content of " + title));
+        tabbedPane.add(panel);
+        int index = tabbedPane.indexOfComponent(panel);
+        tabbedPane.setTabComponentAt(index, new IDETab(tabbedPane, title));
     }
 
-    public void openDocuments(List<String> filePaths) {
-        filePaths.forEach(filePath -> openDocument(Path.of(filePath)));
+    private static void enableTabReordering(JTabbedPane tabbedPane) {
+        TabTransferHandler handler = new TabTransferHandler(tabbedPane);
+        tabbedPane.setTransferHandler(handler);
+        tabbedPane.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                tabbedPane.getTransferHandler().exportAsDrag(tabbedPane, e, TransferHandler.MOVE);
+                //handler.updatePreviewLocation(e);
+            }
+        });
     }
 
-    public void openDocument(Path path) {
-        try {
-            openDocument(path, Files.readString(path));
-        } catch (IOException ex) {
-            // todo: handle this error somehow gracefully
-            showError(ex);
-        }
-    }
-
-    public void openDocument(@Nullable Path path, String content) {
-        EditorDocument doc = new EditorDocument(path, content);
-
-        EditorTab tab = new EditorTab(path, content, doc, this);
-
-        openDocuments.put(tab, doc);
-        tabPane.getTabs().add(tab);
-
-        tabPane.getSelectionModel().select(tab);
-
-        activeDocumentAvailable.set(true);
-    }
-
-    public void closeDocument(EditorTab tab) {
-        openDocuments.remove(tab);
-        if (openDocuments.isEmpty()) {
-            activeDocumentAvailable.set(false);
-        }
-    }
-
-    public Collection<EditorDocument> getOpenDocuments() {
-        return openDocuments.values();
-    }
-
-    public boolean anyOpenDocuments() {
-        return !openDocuments.isEmpty();
-    }
-
-    public boolean anyDirtyDocuments() {
-        return openDocuments.values()
-                .stream()
-                .anyMatch(editorDoc -> editorDoc.dirtyProperty().get());
-    }
-
-    public TabPane getTabPane() {
-        return tabPane;
-    }
-
-    public @Nullable CodeArea getActiveEditor() {
-        EditorDocument editorDocument = getActiveDocument();
-        return (editorDocument != null) ? editorDocument.getEditor() : null;
-    }
-
-    public @Nullable EditorDocument getActiveDocument () {
-        return openDocuments.get(tabPane.getSelectionModel().getSelectedItem());
-    }
-
-    public BooleanProperty activeDocumentAvailableProperty () {
-        return activeDocumentAvailable;
-    }
-
-    public BooleanProperty undoAvailableProperty () {
-        return undoAvailableProperty;
-    }
-
-    public BooleanProperty redoAvailableProperty () {
-        return redoAvailableProperty;
-    }
 }

@@ -1,0 +1,96 @@
+package nl.pallett.jsoneditor.ui.editor.tabs;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
+
+public class IDETab extends JPanel {
+    private final JButton closeButton;
+
+    public IDETab(JTabbedPane pane, String title) {
+        setOpaque(false);
+        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
+        JLabel label = new JLabel(title, JLabel.LEFT);
+        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+        add(label);
+
+        closeButton = new JButton("\u2715");
+        closeButton.setPreferredSize(new Dimension(16, 16));
+        closeButton.setBorder(BorderFactory.createEmptyBorder());
+        closeButton.setContentAreaFilled(false);
+        closeButton.setFocusable(false);
+
+        closeButton.setText("");
+
+        closeButton.addActionListener(e -> {
+            int i = pane.indexOfTabComponent(IDETab.this);
+            if (i != -1) pane.remove(i);
+        });
+        add(closeButton);
+
+        // Fixed hover behavior
+        MouseAdapter hoverListener = new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                closeButton.setText("\u2715"); // show ×
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Point mousePos = MouseInfo.getPointerInfo().getLocation();
+                SwingUtilities.convertPointFromScreen(mousePos, IDETab.this);
+                if (!IDETab.this.contains(mousePos)) closeButton.setText(""); // hide ×
+            }
+        };
+
+        // Mouse adapter for click selection & drag forwarding
+        MouseAdapter tabMouseAdapter = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int i = pane.indexOfTabComponent(IDETab.this);
+                if (i != -1) pane.setSelectedIndex(i);
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                // Forward drag to parent tabbed pane so dragging works on label
+                MouseEvent newEvent = SwingUtilities.convertMouseEvent(IDETab.this, e, pane);
+                for (MouseMotionListener ml : pane.getMouseMotionListeners()) {
+                    ml.mouseDragged(newEvent);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                closeButton.setText("\u2715"); // show ×
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Point mousePos = MouseInfo.getPointerInfo().getLocation();
+                SwingUtilities.convertPointFromScreen(mousePos, IDETab.this);
+                if (!IDETab.this.contains(mousePos)) closeButton.setText(""); // hide ×
+            }
+        };
+
+        addMouseListener(hoverListener);
+        addMouseMotionListener(tabMouseAdapter);
+        label.addMouseListener(tabMouseAdapter);
+        label.addMouseMotionListener(tabMouseAdapter);
+
+        closeButton.addMouseListener(hoverListener);
+    }
+}
+

@@ -2,13 +2,10 @@ package nl.pallett.jsoneditor;
 
 import java.awt.Desktop;
 import java.awt.Toolkit;
-import java.awt.desktop.AppReopenedEvent;
 import java.awt.desktop.OpenFilesEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javafx.application.Platform;
 
 public class MacOSIntegration {
 
@@ -64,7 +61,7 @@ public class MacOSIntegration {
         if (!javafxReady || fileHandler == null) {
             pendingFiles.add(file);
         } else {
-            Platform.runLater(() -> fileHandler.openFile(file));
+            //Platform.runLater(() -> fileHandler.openFile(file));
         }
     }
 
@@ -72,7 +69,7 @@ public class MacOSIntegration {
         if (fileHandler == null) return;
 
         for (File file : pendingFiles) {
-            Platform.runLater(() -> fileHandler.openFile(file));
+            //Platform.runLater(() -> fileHandler.openFile(file));
         }
 
         pendingFiles.clear();
