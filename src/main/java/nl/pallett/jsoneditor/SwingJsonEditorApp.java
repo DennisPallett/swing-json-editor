@@ -29,17 +29,6 @@ public class SwingJsonEditorApp extends Application {
 
 
     public static void main(String[] args) {
-        System.out.println("Yes2");
-
-        System.out.println("args: " + Arrays.toString(args));
-
-        //MacOSAppleEventListener.init();
-
-        // Install raw Apple Event listener
-        //RawAppleEventListener.install();
-
-        MacOSIntegration.init(args);
-
         launch(args);
     }
 
@@ -50,8 +39,7 @@ public class SwingJsonEditorApp extends Application {
 
         this.stage = stage;
 
-        MacOSAppleEventListener.setFileOpenHandler(file -> {
-            System.out.println("open: " + file.getAbsolutePath());
+        MacOSIntegration.setFileOpenHandler(file -> {
             editorManager.openDocument(file.toPath());
         });
 
@@ -97,7 +85,7 @@ public class SwingJsonEditorApp extends Application {
             }
         });
 
-        MacOSAppleEventListener.markJavaFXReady();
+        MacOSIntegration.markJavaFXReady();
 
         // open application with an initial empty JSON document if no initial file has been opened
         if (!editorManager.anyOpenDocuments()) {

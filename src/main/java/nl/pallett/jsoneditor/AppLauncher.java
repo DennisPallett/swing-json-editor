@@ -5,6 +5,7 @@ package nl.pallett.jsoneditor;
  */
 public class AppLauncher {
     public static void main(String[] args) {
+        MacOSIntegration.init(args);
         System.out.println("applauncher");
         SwingJsonEditorApp.main(args);
     }

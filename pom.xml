@@ -187,19 +187,10 @@
     </pluginManagement>
 
     <plugins>
-      <!-- copies app to the modules dir -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <outputDirectory>${bld.modulesDirectory}</outputDirectory>
-        </configuration>
-      </plugin>
-
-      <!-- copies all (both modularized and not modularized) dependencies to the modules dir -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.10.0</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
@@ -208,143 +199,37 @@
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <outputDirectory>${bld.modulesDirectory}</outputDirectory>
+              <outputDirectory>${project.build.directory}/libs</outputDirectory>
               <includeScope>runtime</includeScope>
             </configuration>
           </execution>
         </executions>
       </plugin>
 
-      <!-- injects module-info to specified dependencies  -->
       <plugin>
-        <groupId>org.moditect</groupId>
-        <artifactId>moditect-maven-plugin</artifactId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
         <executions>
           <execution>
-            <id>add-module-info-richtextfx</id>
+            <id>copy-project-jar</id>
             <phase>package</phase>
             <goals>
-              <goal>add-module-info</goal>
+              <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${bld.modulesDirectory}</outputDirectory>
-              <overwriteExistingFiles>true</overwriteExistingFiles>
-              <modules>
-                <module>
-                  <artifact>
-                    <groupId>net.java.dev.jna</groupId>
-                    <artifactId>jna</artifactId>
-                  </artifact>
-                  <moduleInfoSource>
-                    module com.sun.jna {
-                      requires java.logging;
-
-                      exports com.sun.jna;
-                    }
-                  </moduleInfoSource>
-                </module>
-                <module>
-                  <artifact>
-                    <groupId>org.reactfx</groupId>
-                    <artifactId>reactfx</artifactId>
-                  </artifact>
-                  <moduleInfoSource>
-                    module reactfx {
-                    requires transitive javafx.base;
-                    requires transitive javafx.controls;
-                    requires transitive javafx.graphics;
-
-                    exports org.reactfx;
-                    exports org.reactfx.collection;
-                    exports org.reactfx.inhibeans;
-                    exports org.reactfx.inhibeans.binding;
-                    exports org.reactfx.inhibeans.collection;
-                    exports org.reactfx.inhibeans.property;
-                    exports org.reactfx.inhibeans.value;
-                    exports org.reactfx.util;
-                    exports org.reactfx.value;
-                    }
-                  </moduleInfoSource>
-                </module>
-                <module>
-                  <artifact>
-                    <groupId>org.fxmisc.flowless</groupId>
-                    <artifactId>flowless</artifactId>
-                  </artifact>
-                  <moduleInfoSource>
-                    module org.fxmisc.flowless {
-                    requires transitive javafx.base;
-                    requires transitive javafx.controls;
-                    requires transitive javafx.graphics;
-                    requires transitive reactfx;
-
-                    exports org.fxmisc.flowless;
-                    }
-                  </moduleInfoSource>
-                </module>
-                <module>
-                  <artifact>
-                    <groupId>org.fxmisc.wellbehaved</groupId>
-                    <artifactId>wellbehavedfx</artifactId>
-                  </artifact>
-                  <moduleInfoSource>
-                    module org.fxmisc.wellbehaved {
-                    requires transitive javafx.base;
-                    requires transitive javafx.graphics;
-
-                    exports org.fxmisc.wellbehaved.event;
-                    exports org.fxmisc.wellbehaved.event.internal;
-                    exports org.fxmisc.wellbehaved.event.template;
-                    }
-                  </moduleInfoSource>
-                </module>
-                <module>
-                  <artifact>
-                    <groupId>org.fxmisc.undo</groupId>
-                    <artifactId>undofx</artifactId>
-                  </artifact>
-                  <moduleInfoSource>
-                    module org.fxmisc.undo {
-                    requires transitive javafx.base;
-                    requires transitive reactfx;
-
-                    exports org.fxmisc.undo;
-                    exports org.fxmisc.undo.impl;
-                    }
-                  </moduleInfoSource>
-                </module>
-                <module>
-                  <artifact>
-                    <groupId>org.fxmisc.richtext</groupId>
-                    <artifactId>richtextfx</artifactId>
-                  </artifact>
-                  <moduleInfoSource>
-                    module org.fxmisc.richtext {
-
-                    requires transitive javafx.base;
-                    requires transitive javafx.controls;
-                    requires transitive javafx.graphics;
-
-                    requires transitive reactfx;
-                    requires transitive org.fxmisc.flowless;
-                    requires transitive org.fxmisc.undo;
-                    requires org.fxmisc.wellbehaved;
-
-                    exports org.fxmisc.richtext;
-                    exports org.fxmisc.richtext.event;
-                    exports org.fxmisc.richtext.model;
-                    exports org.fxmisc.richtext.util;
-                    }
-                  </moduleInfoSource>
-                </module>
-              </modules>
+              <outputDirectory>${project.build.directory}/libs</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>${project.build.finalName}.jar</include>
+                  </includes>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
-
-
 
       <plugin>
         <groupId>org.openjfx</groupId>
@@ -369,35 +254,7 @@
         </executions>
       </plugin>
 
-      <!-- generates runtime image -->
-      <plugin>
-        <groupId>org.moditect</groupId>
-        <artifactId>moditect-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>create-runtime-image</id>
-            <phase>package</phase>
-            <goals>
-              <goal>create-runtime-image</goal>
-            </goals>
-            <configuration>
-              <modulePath>
-                <path>${bld.modulesDirectory}</path>
-              </modulePath>
-              <modules>
-                <module>nl.pallett.jsoneditor</module>
-              </modules>
-              <launcher>
-                <name>SwingJsonEditor</name>
-                <module>nl.pallett.jsoneditor/${bld.mainClass}</module>
-              </launcher>
-              <outputDirectory>${bld.runtimeImagesDirectory}</outputDirectory>
-              <compression>${bld.compression}</compression>
-              <jarInclusionPolicy>NONE</jarInclusionPolicy>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
 
       <plugin>
         <groupId>org.panteleyev</groupId>
@@ -416,14 +273,18 @@
 
         <configuration>
           <name>Swing Json Editor</name>
-          <runtimeImage>${bld.runtimeImagesDirectory}</runtimeImage>
-          <module>nl.pallett.jsoneditor/nl.pallett.jsoneditor.SwingJsonEditorApp</module>
+          <input>${project.build.directory}/libs</input>
+          <mainJar>${project.build.finalName}.jar</mainJar>
+          <mainClass>nl.pallett.jsoneditor.AppLauncher</mainClass>
           <destination>${project.build.directory}/dist</destination>
           <type>APP_IMAGE</type>
           <removeDestination>true</removeDestination>
           <macPackageName>Swing JSON Editor</macPackageName>
           <icon>src/main/resources/icon/swing-icon.icns</icon>
           <fileAssociations>src/main/resources/file-associations/json-association.properties,src/main/resources/file-associations/yaml-association.properties,,src/main/resources/file-associations/yml-association.properties</fileAssociations>
+          <javaOptions>
+            <javaOption>-Dapple.laf.useScreenMenuBar=true</javaOption>
+          </javaOptions>
         </configuration>
       </plugin>
   </plugins>
