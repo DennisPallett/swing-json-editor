@@ -284,6 +284,7 @@
           <fileAssociations>src/main/resources/file-associations/json-association.properties,src/main/resources/file-associations/yaml-association.properties,,src/main/resources/file-associations/yml-association.properties</fileAssociations>
           <javaOptions>
             <javaOption>-Dapple.laf.useScreenMenuBar=true</javaOption>
+            <javaOption>-Dapple.awt.application.name=Swing JSON Editor</javaOption>
           </javaOptions>
         </configuration>
       </plugin>
