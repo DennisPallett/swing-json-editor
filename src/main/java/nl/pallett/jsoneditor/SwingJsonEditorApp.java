@@ -1,12 +1,10 @@
 package nl.pallett.jsoneditor;
 
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-
-import java.awt.*;
 import nl.pallett.jsoneditor.ui.MainFrame;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class SwingJsonEditorApp {
     public static final String APP_ID = "nl.pallett.jsoneditor";

@@ -1,15 +1,15 @@
 package nl.pallett.jsoneditor.ui;
 
-import java.awt.BorderLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import nl.pallett.jsoneditor.editor.EditorManager;
+import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.menu.FileMenu;
+import nl.pallett.jsoneditor.ui.editor.tabs.EditorTabbedPane;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class MainFrame extends JFrame {
+    private final EditorManager editorManager;
+
 
     public MainFrame() {
         super("My Swing App");
@@ -18,42 +18,24 @@ public class MainFrame extends JFrame {
         setSize(800, 600);
         setLocationRelativeTo(null);
 
+        EditorTabbedPane editorTabbedPane = new EditorTabbedPane();
+        editorManager = new EditorManager(editorTabbedPane);
+
         setJMenuBar(createMenuBar());
-        //add(createMainPanel(), BorderLayout.CENTER);
-        add(new EditorManager(), BorderLayout.CENTER);
+
+        add(editorTabbedPane, BorderLayout.CENTER);
+
+
+
+        // initialize with a new document
+        editorManager.newDocument();
 
         setVisible(true);
     }
 
-    private JPanel createMainPanel() {
-        JPanel panel = new JPanel();
-
-        JButton button = new JButton("Click Me");
-
-        button.addActionListener(e ->
-            JOptionPane.showMessageDialog(this, "Hello from macOS Swing!")
-        );
-
-        panel.add(button);
-        return panel;
-    }
-
     private JMenuBar createMenuBar() {
         JMenuBar bar = new JMenuBar();
-
-        // JMenu fileMenu = new JMenu("File");
-        //
-        // JMenuItem exit = new JMenuItem("Quit");
-        // exit.setAccelerator(
-        //     KeyStroke.getKeyStroke("meta Q") // Cmd+Q on Mac
-        // );
-        //
-        // exit.addActionListener(e -> System.exit(0));
-        //
-        // fileMenu.add(exit);
-
-        bar.add(new FileMenu());
-
+        bar.add(new FileMenu(editorManager));
         return bar;
     }
 

@@ -1,12 +1,17 @@
 package nl.pallett.jsoneditor.menu;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
+import nl.pallett.jsoneditor.controller.EditorManager;
+
+import javax.swing.*;
+import java.nio.file.Path;
 
 public class FileMenu extends JMenu {
-    public FileMenu() {
+    private final EditorManager editorManager;
+
+    public FileMenu(EditorManager editorManager) {
         super("File");
+
+        this.editorManager = editorManager;
 
         JMenuItem newItem = new JMenuItem("New");
         JMenuItem openItem = new JMenuItem("Open...");
@@ -26,11 +31,17 @@ public class FileMenu extends JMenu {
         add(saveAsItem);
         add(saveAllItem);
 
-        newItem.addActionListener(e -> newDocument());
+        newItem.addActionListener(_ -> newDocument());
+        openItem.addActionListener(_ -> openFile());
     }
 
     private void newDocument() {
+        editorManager.newDocument();
+    }
 
+    private void openFile() {
+        // TODO: shown open file picker
+        editorManager.openFile(Path.of("/Users/dennis/Downloads/test.json"));
     }
 
 }
