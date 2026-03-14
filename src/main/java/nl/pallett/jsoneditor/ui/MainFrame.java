@@ -2,7 +2,7 @@ package nl.pallett.jsoneditor.ui;
 
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.menu.FileMenu;
-import nl.pallett.jsoneditor.ui.editor.tabs.EditorTabbedPane;
+import nl.pallett.jsoneditor.ui.tabs.EditorTabbedPane;
 
 import javax.swing.*;
 import java.awt.*;

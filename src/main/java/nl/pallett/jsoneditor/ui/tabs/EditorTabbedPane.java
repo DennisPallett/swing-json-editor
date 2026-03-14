@@ -1,7 +1,8 @@
-package nl.pallett.jsoneditor.ui.editor.tabs;
+package nl.pallett.jsoneditor.ui.tabs;
 
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.ui.editor.EditorPanel;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 import nl.pallett.jsoneditor.view.EditorTabbedView;
 

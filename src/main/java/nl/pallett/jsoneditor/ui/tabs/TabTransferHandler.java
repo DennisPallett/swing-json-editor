@@ -1,22 +1,11 @@
-package nl.pallett.jsoneditor.ui.editor.tabs;
+package nl.pallett.jsoneditor.ui.tabs;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
-import javax.swing.JWindow;
-import javax.swing.TransferHandler;
-import javax.swing.TransferHandler.TransferSupport;
 
 public class TabTransferHandler extends TransferHandler {
     private final JTabbedPane tabbedPane;
