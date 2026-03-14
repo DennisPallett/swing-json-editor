@@ -3,11 +3,13 @@ package nl.pallett.jsoneditor.ui;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.menu.FileMenu;
 import nl.pallett.jsoneditor.ui.tabs.EditorTabbedPane;
+import nl.pallett.jsoneditor.view.MainView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements MainView {
     private final EditorManager editorManager;
 
 
@@ -19,7 +21,7 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
 
         EditorTabbedPane editorTabbedPane = new EditorTabbedPane();
-        editorManager = new EditorManager(editorTabbedPane);
+        editorManager = new EditorManager(this, editorTabbedPane);
 
         setJMenuBar(createMenuBar());
 
@@ -44,5 +46,15 @@ public class MainFrame extends JFrame {
             "An error occurred: " + e.getMessage(),
             "Error",
             JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public File[] showOpenFileDialog() {
+        FileDialog dialog = new FileDialog(this, "Open File", FileDialog.LOAD);
+        dialog.setMode(FileDialog.LOAD);
+        dialog.setVisible(true);
+        dialog.setMultipleMode(true);
+
+        return dialog.getFiles();
     }
 }

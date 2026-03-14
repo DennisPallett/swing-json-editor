@@ -30,7 +30,7 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
 
     public EditorPanelView addTab(EditorDocument editorDocument) {
         // create new editor panel and add to tabbed pane
-        EditorPanel editorPanel = new EditorPanel(editorDocument.getName());
+        EditorPanel editorPanel = new EditorPanel(editorDocument);
         add(editorPanel);
 
         // use custom component as "tab"

@@ -1,21 +1,25 @@
 package nl.pallett.jsoneditor.ui.editor;
 
+import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class EditorPanel extends JPanel implements EditorPanelView {
-    public EditorPanel (String title) {
+    private final EditorDocument editorDocument;
+
+    public EditorPanel (EditorDocument editorDocument) {
         super();
+        this.editorDocument = editorDocument;
 
         setLayout(new BorderLayout());
 
         // Left component
-        JPanel leftPanel = new TreePanel();
+        JPanel leftPanel = new TreePanel(editorDocument);
 
         // Right component
-        JPanel rightPanel = new CodePanel();
+        JPanel rightPanel = new CodePanel(editorDocument);
 
         // Create split pane
         JSplitPane splitPane = new JSplitPane(
