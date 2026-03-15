@@ -37,7 +37,7 @@ public class EditorDocument {
 
     private boolean dirty = false;
 
-    private Long dirtyChecksum;
+    private long dirtyChecksum;
 
     public EditorDocument (String name, @Nullable Path filePath) {
         this.name = name;
@@ -99,8 +99,12 @@ public class EditorDocument {
      * Used to reset the dirty mark of the document. To be called on creation and on-save
      */
     public void resetDirtyMark() {
+        boolean oldDirty = dirty;
+
         this.dirty = false;
         dirtyChecksum = HashUtil.crc32(contents);
+
+        pcs.firePropertyChange(Property.DIRTY_MARK.name(), oldDirty, dirty);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -116,7 +120,7 @@ public class EditorDocument {
 
         long newChecksum = HashUtil.crc32(contents);
         dirty = (dirtyChecksum != newChecksum);
-        
+
         pcs.firePropertyChange(Property.DIRTY_MARK.name(), oldDirty, dirty);
     }
 }

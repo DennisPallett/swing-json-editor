@@ -35,23 +35,12 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
 
         // use custom component as "tab"
         int index = indexOfComponent(editorPanel);
-        setTabComponentAt(index, new IDETab(this, editorDocument.getName()));
+        setTabComponentAt(index, new IDETab(this, editorDocument));
 
         // select new tab
         setSelectedIndex(index);
 
         return editorPanel;
-    }
-
-    private static void addTab(JTabbedPane tabbedPane, String title) {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("Content of " + title));
-        tabbedPane.add(panel);
-
-        int index = tabbedPane.indexOfComponent(panel);
-        tabbedPane.setTabComponentAt(index, new IDETab(tabbedPane, title));
-
-        tabbedPane.setSelectedIndex(index);
     }
 
     private static void enableTabReordering(JTabbedPane tabbedPane) {

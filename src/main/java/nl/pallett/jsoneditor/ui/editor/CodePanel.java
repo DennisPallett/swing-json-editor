@@ -20,13 +20,11 @@ public class CodePanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        textArea = new RSyntaxTextArea(20, 60);
+        textArea = new RSyntaxTextArea(editorDocument.getContents(), 20, 60);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
         add(sp);
-
-        textArea.setText(editorDocument.getContents());
 
         initModelListener();
         initChangeListener();

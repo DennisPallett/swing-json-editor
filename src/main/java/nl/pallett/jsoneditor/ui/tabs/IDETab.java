@@ -1,5 +1,7 @@
 package nl.pallett.jsoneditor.ui.tabs;
 
+import nl.pallett.jsoneditor.model.EditorDocument;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -9,13 +11,17 @@ import java.awt.event.MouseMotionListener;
 public class IDETab extends JPanel {
     private final JButton closeButton;
 
-    public IDETab(JTabbedPane pane, String title) {
+    private final JLabel tabLabel;
+
+    public IDETab(JTabbedPane pane, EditorDocument editorDocument) {
         setOpaque(false);
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
-        JLabel label = new JLabel(title, JLabel.LEFT);
-        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
-        add(label);
+        tabLabel = new JLabel(createTitle(editorDocument), JLabel.LEFT);
+        tabLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+        add(tabLabel);
+
+        addDirtyListener(editorDocument);
 
         closeButton = new JButton("\u2715");
         closeButton.setPreferredSize(new Dimension(16, 16));
@@ -78,10 +84,22 @@ public class IDETab extends JPanel {
 
         addMouseListener(hoverListener);
         addMouseMotionListener(tabMouseAdapter);
-        label.addMouseListener(tabMouseAdapter);
-        label.addMouseMotionListener(tabMouseAdapter);
+        tabLabel.addMouseListener(tabMouseAdapter);
+        tabLabel.addMouseMotionListener(tabMouseAdapter);
 
         closeButton.addMouseListener(hoverListener);
+    }
+
+    private void addDirtyListener(EditorDocument editorDocument) {
+        editorDocument.addPropertyChangeListener(_ -> tabLabel.setText(createTitle(editorDocument)));
+    }
+
+    private String createTitle(EditorDocument editorDocument) {
+        String title = editorDocument.getName();
+        if (editorDocument.isDirty()) {
+            title += "*";
+        }
+        return title;
     }
 }
 
