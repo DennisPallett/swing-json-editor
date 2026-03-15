@@ -1,6 +1,7 @@
 package nl.pallett.jsoneditor.ui.editor;
 
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.ui.editor.tree.TreePanel;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 
 import javax.swing.*;

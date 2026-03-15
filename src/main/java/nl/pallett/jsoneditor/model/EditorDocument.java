@@ -1,6 +1,10 @@
 package nl.pallett.jsoneditor.model;
 
 import nl.pallett.jsoneditor.editor.ast.AstNode;
+import nl.pallett.jsoneditor.editor.parser.FormatParser;
+import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
+import nl.pallett.jsoneditor.editor.parser.YamlParserAdapter;
+import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import org.jspecify.annotations.Nullable;
 
@@ -33,16 +37,17 @@ public class EditorDocument {
 
     private String contents = "";
 
-    private @Nullable AstNode astNodeTree;
+    private @Nullable AstNode astTree;
 
     private boolean dirty = false;
 
     private long dirtyChecksum;
 
+    private DocumentType documentType = DocumentType.JSON;
+
     public EditorDocument (String name, @Nullable Path filePath) {
         this.name = name;
         this.filePath = filePath;
-
 
         if (filePath != null) {
             try {
@@ -51,10 +56,21 @@ public class EditorDocument {
                 // TODO: handle this error
                 System.err.println("Failed to read file: " + e.getMessage());
             }
+
+            String extension = FileUtil.getExtension(filePath);
+            documentType = extension.equals("json") ? DocumentType.JSON : DocumentType.YAML;
         }
 
         // reset dirty mark on init to mark as "fresh"
         resetDirtyMark();
+    }
+
+    public void setDocumentType(DocumentType documentType) {
+        this.documentType = documentType;
+    }
+
+    public DocumentType getDocumentType() {
+        return documentType;
     }
 
     public String getName() {
@@ -77,9 +93,14 @@ public class EditorDocument {
         return contents;
     }
 
-    public void setContents(String contents, ContentsSource contentsSource) {
+    public void setContents(String newContents, ContentsSource contentsSource) {
+        // don't do anything if new contents is exactly the same as the old
+        if (newContents.equals(contents)) {
+            return;
+        }
+
         String old = this.contents;
-        this.contents = contents;
+        this.contents = newContents;
 
         pcs.firePropertyChange(Property.CONTENTS.name(), null,
             new ContentsChangedEvent(old, this.contents, contentsSource));
@@ -87,13 +108,18 @@ public class EditorDocument {
         // when setting new contents calculate new hash for dirty property
         recalculateDirtyMark();
 
-        // TODO: when setting (new contents) calculate AST tree
-        // TODO: when setting new contents calculate new hash for dirty property
+        // when setting (new contents) calculate AST tree
+        recalculateAstTree();
     }
 
     public boolean isDirty() {
         return dirty;
     }
+
+    public AstNode getAstTree() {
+        return astTree;
+    }
+
 
     /**
      * Used to reset the dirty mark of the document. To be called on creation and on-save
@@ -122,5 +148,21 @@ public class EditorDocument {
         dirty = (dirtyChecksum != newChecksum);
 
         pcs.firePropertyChange(Property.DIRTY_MARK.name(), oldDirty, dirty);
+    }
+
+    private void recalculateAstTree() {
+        AstNode oldTree = astTree;
+
+        FormatParser parser = switch(documentType) {
+            case JSON -> new JsonParserAdapter();
+            case YAML -> new YamlParserAdapter();
+        };
+        try {
+            astTree = parser.parse(getContents());
+            pcs.firePropertyChange(Property.AST_TREE.name(), oldTree, astTree);
+        } catch (IOException e) {
+            // TODO: handle exrror
+            System.err.println(e.getMessage());
+        }
     }
 }
