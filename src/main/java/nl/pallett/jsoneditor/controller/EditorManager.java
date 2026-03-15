@@ -1,5 +1,6 @@
 package nl.pallett.jsoneditor.controller;
 
+import nl.pallett.jsoneditor.FileOpenIntegration;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 import nl.pallett.jsoneditor.view.EditorTabbedView;
@@ -22,6 +23,9 @@ public class EditorManager {
         this.tabbedView = tabbedView;
         this.mainView = mainView;
         tabbedView.setEditorManager(this);
+
+        FileOpenIntegration.setFileOpenHandler(this::openFile);
+        FileOpenIntegration.markReady();
     }
 
     public void newDocument() {
@@ -43,6 +47,10 @@ public class EditorManager {
         EditorPanelView editorPanelView = tabbedView.addTab(newDoc);
 
         openDocuments.put(newDoc, editorPanelView);
+    }
+
+    public void openFile(File file) {
+        openFile(file.toPath());
     }
 
 }

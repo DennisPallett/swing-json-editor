@@ -18,7 +18,7 @@ public class SwingJsonEditorApp {
         // Start Swing app on the Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
             setLookAndFeel();
-            setupMacHandlers();
+            setupMacHandlers(args);
             FlatMacLightLaf.setup();
             new MainFrame();
         });
@@ -35,24 +35,24 @@ public class SwingJsonEditorApp {
         }
     }
 
-    private static void setupMacHandlers() {
+    private static void setupMacHandlers(String[] args) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
 
             desktop.setAboutHandler(e ->
                 JOptionPane.showMessageDialog(null,
-                    "My Swing App\nVersion 1.0",
+                    "Swing JSON Editor\nVersion 1.0",
                     "About",
                     JOptionPane.INFORMATION_MESSAGE)
             );
 
-            desktop.setOpenFileHandler(e -> {
-                e.getFiles().forEach(f -> JOptionPane.showMessageDialog(null,
-                    "Open file: " + e.getFiles(),
-                    "Open file",
-                    JOptionPane.INFORMATION_MESSAGE));
-            });
-
+//            desktop.setOpenFileHandler(e -> {
+//                e.getFiles().forEach(f -> JOptionPane.showMessageDialog(null,
+//                    "Open file: " + e.getFiles(),
+//                    "Open file",
+//                    JOptionPane.INFORMATION_MESSAGE));
+//            });
+            FileOpenIntegration.init(args);
 
             desktop.setQuitHandler((e, response) -> {
                 int result = JOptionPane.showConfirmDialog(

@@ -14,7 +14,7 @@ public class MainFrame extends JFrame implements MainView {
 
 
     public MainFrame() {
-        super("My Swing App");
+        super("Swing JSON Editor");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
@@ -26,8 +26,6 @@ public class MainFrame extends JFrame implements MainView {
         setJMenuBar(createMenuBar());
 
         add(editorTabbedPane, BorderLayout.CENTER);
-
-
 
         // initialize with a new document
         editorManager.newDocument();
