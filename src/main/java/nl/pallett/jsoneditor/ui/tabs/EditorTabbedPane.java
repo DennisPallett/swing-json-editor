@@ -1,14 +1,15 @@
 package nl.pallett.jsoneditor.ui.tabs;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import javax.swing.JTabbedPane;
+import javax.swing.TransferHandler;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.ui.editor.EditorPanel;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 import nl.pallett.jsoneditor.view.EditorTabbedView;
-
-import javax.swing.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import org.jspecify.annotations.Nullable;
 
 public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
     private EditorManager editorManager;
@@ -26,6 +27,10 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
 
     public void setEditorManager(EditorManager editorManager) {
         this.editorManager = editorManager;
+    }
+
+    public @Nullable EditorPanelView getActiveEditorPanel() {
+        return (EditorPanelView) this.getSelectedComponent();
     }
 
     public EditorPanelView addTab(EditorDocument editorDocument) {

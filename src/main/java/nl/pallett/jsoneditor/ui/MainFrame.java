@@ -1,13 +1,16 @@
 package nl.pallett.jsoneditor.ui;
 
+import java.awt.BorderLayout;
+import java.awt.FileDialog;
+import java.io.File;
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import nl.pallett.jsoneditor.controller.EditorManager;
+import nl.pallett.jsoneditor.menu.EditMenu;
 import nl.pallett.jsoneditor.menu.FileMenu;
 import nl.pallett.jsoneditor.ui.tabs.EditorTabbedPane;
 import nl.pallett.jsoneditor.view.MainView;
-
-import javax.swing.*;
-import java.awt.*;
-import java.io.File;
 
 public class MainFrame extends JFrame implements MainView {
     private final EditorManager editorManager;
@@ -36,6 +39,7 @@ public class MainFrame extends JFrame implements MainView {
     private JMenuBar createMenuBar() {
         JMenuBar bar = new JMenuBar();
         bar.add(new FileMenu(editorManager));
+        bar.add(new EditMenu(editorManager));
         return bar;
     }
 

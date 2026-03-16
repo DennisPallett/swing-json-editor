@@ -1,18 +1,19 @@
 package nl.pallett.jsoneditor.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.parser.FormatParser;
 import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
 import nl.pallett.jsoneditor.editor.parser.YamlParserAdapter;
 import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
+import nl.pallett.jsoneditor.util.StringUtil;
 import org.jspecify.annotations.Nullable;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class EditorDocument {
     public enum ContentsSource {
@@ -139,6 +140,20 @@ public class EditorDocument {
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(listener);
+    }
+
+    public void formatContents() {
+        if (contents.isEmpty()) {
+            return;
+        }
+
+        try {
+            String formatted = StringUtil.formatCode(documentType, contents);
+            setContents(formatted, ContentsSource.OTHER);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private void recalculateDirtyMark() {

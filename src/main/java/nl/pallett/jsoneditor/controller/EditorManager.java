@@ -1,15 +1,16 @@
 package nl.pallett.jsoneditor.controller;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import nl.pallett.jsoneditor.FileOpenIntegration;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 import nl.pallett.jsoneditor.view.EditorTabbedView;
 import nl.pallett.jsoneditor.view.MainView;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 public class EditorManager {
 
@@ -51,6 +52,19 @@ public class EditorManager {
 
     public void openFile(File file) {
         openFile(file.toPath());
+    }
+
+    public @Nullable EditorDocument getActiveDocument() {
+        EditorPanelView activeEditorPanel = tabbedView.getActiveEditorPanel();
+        if (activeEditorPanel != null) {
+            return openDocuments.entrySet()
+                .stream()
+                .filter(entry -> Objects.equals(entry.getValue(), activeEditorPanel))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+        }
+        return null;
     }
 
 }
