@@ -59,26 +59,41 @@ public class EditorManager {
         }
     }
 
-    public void saveFileAs() {
-        File saveToFile = mainView.showSaveFileDialog();
-        if (saveToFile == null) {
+    public void saveFile(EditorDocument editorDocument) {
+        if (editorDocument == null) {
+            // TODO: improve error handling
+            MainFrame.showError(new IllegalStateException("Unable to save; no active document opened"));
             return;
         }
 
-        EditorDocument activeDocument = getActiveDocument();
-        if (activeDocument == null) {
+        if (editorDocument.getFilePath() == null) {
+            saveFileAs();
             return;
         }
 
         try {
-            Files.writeString(saveToFile.toPath(), activeDocument.getContents());
+            Files.writeString(editorDocument.getFilePath(), editorDocument.getContents());
         } catch (IOException e) {
             // TODO: improve error handling
             MainFrame.showError(e);
         }
 
-        activeDocument.resetDirtyMark();
+        editorDocument.resetDirtyMark();
+    }
+
+    public void saveFileAs() {
+        EditorDocument activeDocument = getActiveDocument();
+        if (activeDocument == null) {
+            return;
+        }
+
+        File saveToFile = mainView.showSaveFileDialog(activeDocument.getName());
+        if (saveToFile == null) {
+            return;
+        }
+
         activeDocument.setFilePath(saveToFile.toPath());
+        saveFile(activeDocument);
     }
 
     public void openFile(Path file) {

@@ -1,17 +1,15 @@
 package nl.pallett.jsoneditor.ui;
 
-import java.awt.BorderLayout;
-import java.awt.FileDialog;
-import java.io.File;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.menu.EditMenu;
 import nl.pallett.jsoneditor.menu.FileMenu;
 import nl.pallett.jsoneditor.ui.tabs.EditorTabbedPane;
 import nl.pallett.jsoneditor.view.MainView;
 import org.jspecify.annotations.Nullable;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 
 public class MainFrame extends JFrame implements MainView {
     private final EditorManager editorManager;
@@ -54,8 +52,9 @@ public class MainFrame extends JFrame implements MainView {
     }
 
     @Override
-    public @Nullable File showSaveFileDialog() {
+    public @Nullable File showSaveFileDialog(String initialFilename) {
         FileDialog dialog = new FileDialog(this, "Save File", FileDialog.SAVE);
+        dialog.setFile(initialFilename);
         dialog.setVisible(true);
 
         File[] files = dialog.getFiles();

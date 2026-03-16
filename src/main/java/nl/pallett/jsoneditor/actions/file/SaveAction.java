@@ -24,6 +24,6 @@ public class SaveAction extends AbstractActionWithState {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        editorManager.saveFile(editorManager.getActiveDocument());
     }
 }

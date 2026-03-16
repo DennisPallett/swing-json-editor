@@ -1,11 +1,6 @@
 package nl.pallett.jsoneditor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.parser.FormatParser;
 import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
@@ -14,6 +9,12 @@ import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import nl.pallett.jsoneditor.util.StringUtil;
 import org.jspecify.annotations.Nullable;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class EditorDocument {
     public enum ContentsSource {
@@ -90,6 +91,7 @@ public class EditorDocument {
     public void setFilePath(Path filePath) {
         Path oldFilePath = this.filePath;
         this.filePath = filePath;
+        this.name = filePath.getFileName().toString();
 
         pcs.firePropertyChange(Property.FILE_PATH.name(), oldFilePath, filePath);
     }
