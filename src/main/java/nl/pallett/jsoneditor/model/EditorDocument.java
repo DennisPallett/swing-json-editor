@@ -142,8 +142,12 @@ public class EditorDocument {
         pcs.removePropertyChangeListener(listener);
     }
 
+    public boolean canBeFormatted() {
+        return !contents.isEmpty();
+    }
+
     public void formatContents() {
-        if (contents.isEmpty()) {
+        if (!canBeFormatted()) {
             return;
         }
 

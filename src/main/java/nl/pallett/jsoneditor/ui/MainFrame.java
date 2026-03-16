@@ -5,7 +5,6 @@ import java.awt.FileDialog;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.menu.EditMenu;
 import nl.pallett.jsoneditor.menu.FileMenu;
@@ -41,13 +40,6 @@ public class MainFrame extends JFrame implements MainView {
         bar.add(new FileMenu(editorManager));
         bar.add(new EditMenu(editorManager));
         return bar;
-    }
-
-    public static void showError(Exception e) {
-        JOptionPane.showMessageDialog(null,
-            "An error occurred: " + e.getMessage(),
-            "Error",
-            JOptionPane.ERROR_MESSAGE);
     }
 
     @Override

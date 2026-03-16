@@ -1,7 +1,9 @@
 package nl.pallett.jsoneditor.ui.tabs;
 
+import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.EventListener;
 import javax.swing.JTabbedPane;
 import javax.swing.TransferHandler;
 import nl.pallett.jsoneditor.controller.EditorManager;
@@ -16,12 +18,6 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
 
     public EditorTabbedPane() {
         super();
-
-        // Add sample tabs
-        //addTab(this, "Dashboard");
-        //addTab(this, "Settings");
-        //addTab(this, "Logs");
-
         enableTabReordering(this);
     }
 
@@ -31,6 +27,18 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
 
     public @Nullable EditorPanelView getActiveEditorPanel() {
         return (EditorPanelView) this.getSelectedComponent();
+    }
+
+    public void addChangeEditorPanelListener(ChangeEditorPanelListener listener) {
+        addChangeListener(e -> {
+            Component selected = getSelectedComponent();
+
+            if (selected instanceof EditorPanelView) {
+                listener.onTabChange((EditorPanelView) selected);
+            } else {
+                listener.onTabChange(null);
+            }
+        });
     }
 
     public EditorPanelView addTab(EditorDocument editorDocument) {
@@ -59,5 +67,10 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
             }
         });
     }
+
+    public interface ChangeEditorPanelListener extends EventListener {
+        void onTabChange(@Nullable EditorPanelView editorPanel);
+    }
+
 
 }

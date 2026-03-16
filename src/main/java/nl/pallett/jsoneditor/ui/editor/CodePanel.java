@@ -1,14 +1,15 @@
 package nl.pallett.jsoneditor.ui.editor;
 
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
 
 public class CodePanel extends JPanel {
     private final EditorDocument editorDocument;

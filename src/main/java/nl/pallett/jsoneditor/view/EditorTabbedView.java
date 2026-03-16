@@ -2,10 +2,12 @@ package nl.pallett.jsoneditor.view;
 
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.ui.tabs.EditorTabbedPane.ChangeEditorPanelListener;
 import org.jspecify.annotations.Nullable;
 
 public interface EditorTabbedView {
     EditorPanelView addTab(EditorDocument editorDocument);
     void setEditorManager(EditorManager editorManager);
     @Nullable EditorPanelView getActiveEditorPanel();
+    void addChangeEditorPanelListener(ChangeEditorPanelListener listener);
 }

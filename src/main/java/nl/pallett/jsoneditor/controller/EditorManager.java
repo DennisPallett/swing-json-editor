@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import nl.pallett.jsoneditor.FileOpenIntegration;
+import nl.pallett.jsoneditor.actions.ActionManager;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 import nl.pallett.jsoneditor.view.EditorTabbedView;
@@ -18,6 +19,8 @@ public class EditorManager {
 
     private final EditorTabbedView tabbedView;
 
+    private final ActionManager actionManager;
+
     private final Map<EditorDocument, EditorPanelView> openDocuments = new HashMap<>();
 
     public EditorManager(MainView mainView, EditorTabbedView tabbedView) {
@@ -25,15 +28,21 @@ public class EditorManager {
         this.mainView = mainView;
         tabbedView.setEditorManager(this);
 
+        this.actionManager = new ActionManager(this);
+
         FileOpenIntegration.setFileOpenHandler(this::openFile);
         FileOpenIntegration.markReady();
+
+        tabbedView.addChangeEditorPanelListener(activeEditorPanel -> {
+            this.actionManager.updateState();
+        });
     }
 
     public void newDocument() {
         EditorDocument newDoc = new EditorDocument("Untitled", null);
         EditorPanelView editorPanelView = tabbedView.addTab(newDoc);
 
-        openDocuments.put(newDoc, editorPanelView);
+        addDocument(newDoc, editorPanelView);
     }
 
     public void selectFileToOpen() {
@@ -44,14 +53,18 @@ public class EditorManager {
     }
 
     public void openFile(Path file) {
-        EditorDocument newDoc = new EditorDocument(file.getFileName().toString(), file);
-        EditorPanelView editorPanelView = tabbedView.addTab(newDoc);
+        EditorDocument document = new EditorDocument(file.getFileName().toString(), file);
+        EditorPanelView editorPanelView = tabbedView.addTab(document);
 
-        openDocuments.put(newDoc, editorPanelView);
+        addDocument(document, editorPanelView);
     }
 
     public void openFile(File file) {
         openFile(file.toPath());
+    }
+
+    public ActionManager getActionManager() {
+        return actionManager;
     }
 
     public @Nullable EditorDocument getActiveDocument() {
@@ -65,6 +78,16 @@ public class EditorManager {
                 .orElse(null);
         }
         return null;
+    }
+
+    private void addDocument(EditorDocument document, EditorPanelView editorPanelView) {
+        openDocuments.put(document, editorPanelView);
+        
+        document.addPropertyChangeListener(evt -> {
+            if (EditorDocument.Property.CONTENTS.name().equals(evt.getPropertyName())) {
+                this.actionManager.updateState();
+            }
+        });
     }
 
 }
