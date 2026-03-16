@@ -8,8 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import nl.pallett.jsoneditor.FileOpenIntegration;
+import nl.pallett.jsoneditor.actions.AbstractActionWithState;
 import nl.pallett.jsoneditor.actions.ActionManager;
+import nl.pallett.jsoneditor.actions.ActionManager.Action;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.model.EditorDocument.Property;
 import nl.pallett.jsoneditor.ui.MainFrame;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 import nl.pallett.jsoneditor.view.EditorTabbedView;
@@ -115,6 +118,10 @@ public class EditorManager {
         document.addPropertyChangeListener(evt -> {
             if (EditorDocument.Property.CONTENTS.name().equals(evt.getPropertyName())) {
                 this.actionManager.updateState(editorPanelView);
+            }
+
+            if (Property.FILE_PATH.name().equals(evt.getPropertyName())) {
+                ((AbstractActionWithState)this.actionManager.getAction(Action.SAVE)).updateState(editorPanelView);
             }
         });
     }

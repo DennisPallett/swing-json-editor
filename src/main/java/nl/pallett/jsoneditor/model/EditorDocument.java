@@ -25,7 +25,8 @@ public class EditorDocument {
     public enum Property {
         CONTENTS,
         AST_TREE,
-        DIRTY_MARK
+        DIRTY_MARK,
+        FILE_PATH
     }
 
     public record ContentsChangedEvent (String oldContent, String newContent, ContentsSource source) {}
@@ -87,7 +88,10 @@ public class EditorDocument {
     }
 
     public void setFilePath(Path filePath) {
+        Path oldFilePath = this.filePath;
         this.filePath = filePath;
+
+        pcs.firePropertyChange(Property.FILE_PATH.name(), oldFilePath, filePath);
     }
 
     public String getContents() {

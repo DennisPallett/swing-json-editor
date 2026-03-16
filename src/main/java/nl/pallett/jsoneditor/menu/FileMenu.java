@@ -23,7 +23,7 @@ public class FileMenu extends JMenu {
         newItem.setAccelerator(KeyStroke.getKeyStroke("meta T"));
         openItem.setAccelerator(KeyStroke.getKeyStroke("meta O"));
         saveItem.setAccelerator(KeyStroke.getKeyStroke("meta S"));
-        saveAsItem.setAccelerator(KeyStroke.getKeyStroke("meta S"));
+        saveAsItem.setAccelerator(KeyStroke.getKeyStroke("meta shift S"));
 
         add(newItem);
         add(openItem);
