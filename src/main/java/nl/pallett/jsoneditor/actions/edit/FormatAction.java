@@ -1,8 +1,11 @@
-package nl.pallett.jsoneditor.actions;
+package nl.pallett.jsoneditor.actions.edit;
 
 import java.awt.event.ActionEvent;
+import nl.pallett.jsoneditor.actions.AbstractActionWithState;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.view.EditorPanelView;
+import org.jspecify.annotations.Nullable;
 
 public class FormatAction extends AbstractActionWithState {
 
@@ -23,14 +26,11 @@ public class FormatAction extends AbstractActionWithState {
     }
 
     @Override
-    void updateState() {
-        var enabled = false;
-
-        EditorDocument editorDocument = editorManager.getActiveDocument();
-        if (editorDocument != null) {
-            enabled = editorDocument.canBeFormatted();
-        }
-
-        setEnabled(enabled);
+    public void updateState(@Nullable EditorPanelView editorPanel) {
+        setEnabled(
+            editorPanel != null
+                && editorPanel.getEditorDocument() != null
+                && editorPanel.getEditorDocument().canBeFormatted()
+        );
     }
 }

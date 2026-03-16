@@ -33,8 +33,8 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
         addChangeListener(e -> {
             Component selected = getSelectedComponent();
 
-            if (selected instanceof EditorPanelView) {
-                listener.onTabChange((EditorPanelView) selected);
+            if (selected instanceof EditorPanelView editorPanelView) {
+                listener.onTabChange(editorPanelView);
             } else {
                 listener.onTabChange(null);
             }

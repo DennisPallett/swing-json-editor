@@ -5,11 +5,13 @@ import java.awt.FileDialog;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.menu.EditMenu;
 import nl.pallett.jsoneditor.menu.FileMenu;
 import nl.pallett.jsoneditor.ui.tabs.EditorTabbedPane;
 import nl.pallett.jsoneditor.view.MainView;
+import org.jspecify.annotations.Nullable;
 
 public class MainFrame extends JFrame implements MainView {
     private final EditorManager editorManager;
@@ -45,10 +47,30 @@ public class MainFrame extends JFrame implements MainView {
     @Override
     public File[] showOpenFileDialog() {
         FileDialog dialog = new FileDialog(this, "Open File", FileDialog.LOAD);
-        dialog.setMode(FileDialog.LOAD);
         dialog.setVisible(true);
         dialog.setMultipleMode(true);
 
         return dialog.getFiles();
     }
+
+    @Override
+    public @Nullable File showSaveFileDialog() {
+        FileDialog dialog = new FileDialog(this, "Save File", FileDialog.SAVE);
+        dialog.setVisible(true);
+
+        File[] files = dialog.getFiles();
+        if (files.length == 0) {
+            return null;
+        } else {
+            return files[0];
+        }
+    }
+
+    public static void showError(Exception e) {
+        JOptionPane.showMessageDialog(null,
+            "An error occurred: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+    }
+
 }

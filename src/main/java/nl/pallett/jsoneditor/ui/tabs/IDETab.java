@@ -1,12 +1,19 @@
 package nl.pallett.jsoneditor.ui.tabs;
 
-import nl.pallett.jsoneditor.model.EditorDocument;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
+import nl.pallett.jsoneditor.model.EditorDocument;
 
 public class IDETab extends JPanel {
     private final JButton closeButton;
@@ -96,6 +103,11 @@ public class IDETab extends JPanel {
 
     private String createTitle(EditorDocument editorDocument) {
         String title = editorDocument.getName();
+
+        if (title.length() > 10) {
+            title =  title.substring(0, 10);
+        }
+
         if (editorDocument.isDirty()) {
             title += "*";
         }

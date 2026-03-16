@@ -1,6 +1,8 @@
 package nl.pallett.jsoneditor.controller;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.Objects;
 import nl.pallett.jsoneditor.FileOpenIntegration;
 import nl.pallett.jsoneditor.actions.ActionManager;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.ui.MainFrame;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 import nl.pallett.jsoneditor.view.EditorTabbedView;
 import nl.pallett.jsoneditor.view.MainView;
@@ -33,9 +36,9 @@ public class EditorManager {
         FileOpenIntegration.setFileOpenHandler(this::openFile);
         FileOpenIntegration.markReady();
 
-        tabbedView.addChangeEditorPanelListener(activeEditorPanel -> {
-            this.actionManager.updateState();
-        });
+        tabbedView.addChangeEditorPanelListener(
+            activeEditorPanel -> this.actionManager.updateState(activeEditorPanel)
+        );
     }
 
     public void newDocument() {
@@ -50,6 +53,28 @@ public class EditorManager {
         for(File file : filesToOpen) {
             openFile(file.toPath());
         }
+    }
+
+    public void saveFileAs() {
+        File saveToFile = mainView.showSaveFileDialog();
+        if (saveToFile == null) {
+            return;
+        }
+
+        EditorDocument activeDocument = getActiveDocument();
+        if (activeDocument == null) {
+            return;
+        }
+
+        try {
+            Files.writeString(saveToFile.toPath(), activeDocument.getContents());
+        } catch (IOException e) {
+            // TODO: improve error handling
+            MainFrame.showError(e);
+        }
+
+        activeDocument.resetDirtyMark();
+        activeDocument.setFilePath(saveToFile.toPath());
     }
 
     public void openFile(Path file) {
@@ -89,7 +114,7 @@ public class EditorManager {
 
         document.addPropertyChangeListener(evt -> {
             if (EditorDocument.Property.CONTENTS.name().equals(evt.getPropertyName())) {
-                this.actionManager.updateState();
+                this.actionManager.updateState(editorPanelView);
             }
         });
     }

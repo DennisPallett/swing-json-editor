@@ -1,10 +1,11 @@
-package nl.pallett.jsoneditor.actions;
+package nl.pallett.jsoneditor.actions.edit;
 
 import java.awt.event.ActionEvent;
+import nl.pallett.jsoneditor.actions.AbstractActionWithState;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 
-public class RedoAction extends AbstractActionWithState{
+public class RedoAction extends AbstractActionWithState {
     private final EditorManager editorManager;
 
     public RedoAction(EditorManager editorManager) {
@@ -13,7 +14,7 @@ public class RedoAction extends AbstractActionWithState{
     }
 
     @Override
-    void updateState() {
+    public void updateState(EditorPanelView editorPanel) {
         EditorPanelView activeEditorPanel = editorManager.getActiveEditorPanel();
         setEnabled (activeEditorPanel != null && activeEditorPanel.canRedo());
     }

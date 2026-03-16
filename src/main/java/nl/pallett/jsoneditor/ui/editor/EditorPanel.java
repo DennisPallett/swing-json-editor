@@ -44,6 +44,11 @@ public class EditorPanel extends JPanel implements EditorPanelView {
     }
 
     @Override
+    public EditorDocument getEditorDocument() {
+        return editorDocument;
+    }
+
+    @Override
     public void undo () {
         codePanel.undo();
     }
