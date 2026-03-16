@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor.view;
+package nl.pallett.jsoneditor.view.editor;
 
 import nl.pallett.jsoneditor.model.EditorDocument;
 

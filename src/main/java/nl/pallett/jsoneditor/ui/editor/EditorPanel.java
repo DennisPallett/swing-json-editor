@@ -1,12 +1,13 @@
 package nl.pallett.jsoneditor.ui.editor;
 
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
+import nl.pallett.jsoneditor.controller.EditorController;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.ui.editor.code.CodePanel;
 import nl.pallett.jsoneditor.ui.editor.tree.TreePanel;
-import nl.pallett.jsoneditor.view.EditorPanelView;
+import nl.pallett.jsoneditor.view.editor.EditorPanelView;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class EditorPanel extends JPanel implements EditorPanelView {
     private final EditorDocument editorDocument;
@@ -14,6 +15,8 @@ public class EditorPanel extends JPanel implements EditorPanelView {
     private final TreePanel treePanel;
 
     private final CodePanel codePanel;
+
+    private final EditorController editorController;
 
     public EditorPanel (EditorDocument editorDocument) {
         super();
@@ -26,6 +29,8 @@ public class EditorPanel extends JPanel implements EditorPanelView {
 
         // Right component
         codePanel = new CodePanel(editorDocument);
+
+        this.editorController = new EditorController(this, codePanel, treePanel);
 
         // Create split pane
         JSplitPane splitPane = new JSplitPane(

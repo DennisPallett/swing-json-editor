@@ -1,11 +1,12 @@
 package nl.pallett.jsoneditor.actions.edit;
 
-import java.awt.event.ActionEvent;
 import nl.pallett.jsoneditor.actions.AbstractActionWithState;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.model.EditorDocument;
-import nl.pallett.jsoneditor.view.EditorPanelView;
+import nl.pallett.jsoneditor.view.editor.EditorPanelView;
 import org.jspecify.annotations.Nullable;
+
+import java.awt.event.ActionEvent;
 
 public class FormatAction extends AbstractActionWithState {
 

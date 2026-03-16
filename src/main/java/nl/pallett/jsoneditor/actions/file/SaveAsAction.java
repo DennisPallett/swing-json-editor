@@ -1,10 +1,11 @@
 package nl.pallett.jsoneditor.actions.file;
 
-import java.awt.event.ActionEvent;
 import nl.pallett.jsoneditor.actions.AbstractActionWithState;
 import nl.pallett.jsoneditor.controller.EditorManager;
-import nl.pallett.jsoneditor.view.EditorPanelView;
+import nl.pallett.jsoneditor.view.editor.EditorPanelView;
 import org.jspecify.annotations.Nullable;
+
+import java.awt.event.ActionEvent;
 
 public class SaveAsAction extends AbstractActionWithState {
     public final EditorManager editorManager;

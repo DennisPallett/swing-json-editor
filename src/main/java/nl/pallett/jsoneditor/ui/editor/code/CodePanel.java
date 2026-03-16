@@ -1,21 +1,22 @@
-package nl.pallett.jsoneditor.ui.editor;
+package nl.pallett.jsoneditor.ui.editor.code;
 
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import nl.pallett.jsoneditor.model.EditorDocument;
-import nl.pallett.jsoneditor.view.CodePanelView;
+import nl.pallett.jsoneditor.view.editor.CodePanelView;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
 
 public class CodePanel extends JPanel implements CodePanelView {
     private final EditorDocument editorDocument;
 
     private final RSyntaxTextArea textArea;
+
+    private final AdaptiveScroller scroller = new AdaptiveScroller();
 
     public CodePanel (EditorDocument editorDocument) {
         this.editorDocument = editorDocument;
@@ -50,6 +51,11 @@ public class CodePanel extends JPanel implements CodePanelView {
     @Override
     public boolean canRedo() {
         return textArea.canRedo();
+    }
+
+    @Override
+    public void scrollTo(int offset) {
+        scroller.scrollToOffsetAdaptive(textArea, offset);
     }
 
     private void initModelListener() {

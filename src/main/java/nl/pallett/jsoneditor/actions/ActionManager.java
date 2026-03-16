@@ -1,17 +1,18 @@
 package nl.pallett.jsoneditor.actions;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import javax.swing.AbstractAction;
 import nl.pallett.jsoneditor.actions.edit.FormatAction;
 import nl.pallett.jsoneditor.actions.edit.RedoAction;
 import nl.pallett.jsoneditor.actions.edit.UndoAction;
 import nl.pallett.jsoneditor.actions.file.SaveAction;
 import nl.pallett.jsoneditor.actions.file.SaveAsAction;
 import nl.pallett.jsoneditor.controller.EditorManager;
-import nl.pallett.jsoneditor.view.EditorPanelView;
+import nl.pallett.jsoneditor.view.editor.EditorPanelView;
 import org.jspecify.annotations.Nullable;
+
+import javax.swing.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class ActionManager {
     private final EditorManager editorManager;

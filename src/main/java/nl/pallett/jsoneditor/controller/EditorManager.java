@@ -1,12 +1,5 @@
 package nl.pallett.jsoneditor.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import nl.pallett.jsoneditor.FileOpenIntegration;
 import nl.pallett.jsoneditor.actions.AbstractActionWithState;
 import nl.pallett.jsoneditor.actions.ActionManager;
@@ -14,10 +7,18 @@ import nl.pallett.jsoneditor.actions.ActionManager.Action;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.model.EditorDocument.Property;
 import nl.pallett.jsoneditor.ui.MainFrame;
-import nl.pallett.jsoneditor.view.EditorPanelView;
-import nl.pallett.jsoneditor.view.EditorTabbedView;
 import nl.pallett.jsoneditor.view.MainView;
+import nl.pallett.jsoneditor.view.editor.EditorPanelView;
+import nl.pallett.jsoneditor.view.editor.EditorTabbedView;
 import org.jspecify.annotations.Nullable;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class EditorManager {
 

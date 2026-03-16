@@ -2,13 +2,15 @@ package nl.pallett.jsoneditor.ui.editor.tree;
 
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.view.editor.NodeSelectedListener;
+import nl.pallett.jsoneditor.view.editor.TreePanelView;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 
-public class TreePanel extends JPanel {
+public class TreePanel extends JPanel implements TreePanelView {
     private final EditorDocument editorDocument;
 
     private final TreeBuilder treeBuilder = new TreeBuilder();
@@ -31,9 +33,25 @@ public class TreePanel extends JPanel {
         // create initial tree
         refreshTree();
 
-        add (tree);
+        // Put the tree inside a scroll pane
+        JScrollPane scrollPane = new JScrollPane(tree);
+        add (scrollPane);
 
         addAstListener();
+    }
+
+    @Override
+    public void addNodeSelectedListener(NodeSelectedListener listener) {
+        tree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode node =
+                (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+
+            if (node != null && node.getUserObject() instanceof AstNode astNode) {
+                listener.onNodeSelected(astNode);
+            } else {
+                listener.onNodeSelected(null);
+            }
+        });
     }
 
     private void addAstListener() {
