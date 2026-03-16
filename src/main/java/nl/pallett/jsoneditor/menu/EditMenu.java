@@ -3,23 +3,19 @@ package nl.pallett.jsoneditor.menu;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import nl.pallett.jsoneditor.actions.ActionManager;
+import nl.pallett.jsoneditor.actions.ActionManager.Action;
 import nl.pallett.jsoneditor.controller.EditorManager;
-import nl.pallett.jsoneditor.model.EditorDocument;
 
 public class EditMenu extends JMenu  {
-    private final EditorManager editorManager;
-
-    private JMenuItem undoItem;
-    private JMenuItem redoItem;
-    private JMenuItem formatJsonItem;
 
     public EditMenu(EditorManager editorManager) {
         super("Edit");
-        this.editorManager = editorManager;
+        ActionManager actionManager = editorManager.getActionManager();
 
-        undoItem = new JMenuItem("Undo");
-        redoItem = new JMenuItem("Redo");
-        formatJsonItem = new JMenuItem(editorManager.getActionManager().getFormatAction());
+        var undoItem = new JMenuItem(actionManager.getAction(Action.UNDO));
+        var redoItem = new JMenuItem(actionManager.getAction(Action.REDO));
+        var formatJsonItem = new JMenuItem(actionManager.getAction(Action.FORMAT));
 
         undoItem.setAccelerator(KeyStroke.getKeyStroke("meta Z"));
         redoItem.setAccelerator(KeyStroke.getKeyStroke("meta shift Z"));
@@ -29,25 +25,5 @@ public class EditMenu extends JMenu  {
         add(redoItem);
         addSeparator();
         add(formatJsonItem);
-
-        //undoItem.addActionListener(_ -> newDocument());
-        //redoItem.addActionListener(_ -> newDocument());
-
-        //updateState();
-    }
-
-    private void updateState() {
-        boolean formatEnabled = false;
-        boolean undoEnabled = false;
-        boolean redoEnabled = false;
-
-        EditorDocument editorDocument = editorManager.getActiveDocument();
-        if (editorDocument != null) {
-            formatEnabled = editorDocument.canBeFormatted();
-        }
-
-        undoItem.setEnabled(undoEnabled);
-        redoItem.setEnabled(redoEnabled);
-        formatJsonItem.setEnabled(formatEnabled);
     }
 }

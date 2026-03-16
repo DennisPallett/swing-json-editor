@@ -80,9 +80,13 @@ public class EditorManager {
         return null;
     }
 
+    public @Nullable EditorPanelView getActiveEditorPanel() {
+        return tabbedView.getActiveEditorPanel();
+    }
+
     private void addDocument(EditorDocument document, EditorPanelView editorPanelView) {
         openDocuments.put(document, editorPanelView);
-        
+
         document.addPropertyChangeListener(evt -> {
             if (EditorDocument.Property.CONTENTS.name().equals(evt.getPropertyName())) {
                 this.actionManager.updateState();

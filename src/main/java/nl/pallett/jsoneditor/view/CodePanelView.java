@@ -1,6 +1,6 @@
 package nl.pallett.jsoneditor.view;
 
-public interface EditorPanelView {
+public interface CodePanelView {
     void undo();
     void redo();
     boolean canUndo();

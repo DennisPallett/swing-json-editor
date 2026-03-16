@@ -7,11 +7,12 @@ import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.view.CodePanelView;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
-public class CodePanel extends JPanel {
+public class CodePanel extends JPanel implements CodePanelView {
     private final EditorDocument editorDocument;
 
     private final RSyntaxTextArea textArea;
@@ -29,6 +30,26 @@ public class CodePanel extends JPanel {
 
         initModelListener();
         initChangeListener();
+    }
+
+    @Override
+    public void undo() {
+        textArea.undoLastAction();
+    }
+
+    @Override
+    public void redo() {
+        textArea.redoLastAction();
+    }
+
+    @Override
+    public boolean canUndo() {
+        return textArea.canUndo();
+    }
+
+    @Override
+    public boolean canRedo() {
+        return textArea.canRedo();
     }
 
     private void initModelListener() {

@@ -1,14 +1,19 @@
 package nl.pallett.jsoneditor.ui.editor;
 
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.ui.editor.tree.TreePanel;
 import nl.pallett.jsoneditor.view.EditorPanelView;
 
-import javax.swing.*;
-import java.awt.*;
-
 public class EditorPanel extends JPanel implements EditorPanelView {
     private final EditorDocument editorDocument;
+
+    private final TreePanel treePanel;
+
+    private final CodePanel codePanel;
 
     public EditorPanel (EditorDocument editorDocument) {
         super();
@@ -17,16 +22,16 @@ public class EditorPanel extends JPanel implements EditorPanelView {
         setLayout(new BorderLayout());
 
         // Left component
-        JPanel leftPanel = new TreePanel(editorDocument);
+        treePanel = new TreePanel(editorDocument);
 
         // Right component
-        JPanel rightPanel = new CodePanel(editorDocument);
+        codePanel = new CodePanel(editorDocument);
 
         // Create split pane
         JSplitPane splitPane = new JSplitPane(
             JSplitPane.HORIZONTAL_SPLIT,
-            leftPanel,
-            rightPanel
+            treePanel,
+            codePanel
         );
         splitPane.setDividerSize(8);        // thickness of divider
         //splitPane.setOneTouchExpandable(true); // small collapse arrows
@@ -36,5 +41,25 @@ public class EditorPanel extends JPanel implements EditorPanelView {
         SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.5));
 
         add(splitPane);
+    }
+
+    @Override
+    public void undo () {
+        codePanel.undo();
+    }
+
+    @Override
+    public void redo () {
+        codePanel.redo();
+    }
+
+    @Override
+    public boolean canUndo() {
+        return codePanel.canUndo();
+    }
+
+    @Override
+    public boolean canRedo() {
+        return codePanel.canRedo();
     }
 }
