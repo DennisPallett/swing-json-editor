@@ -24,19 +24,26 @@ public class CodePanel extends JPanel implements CodePanelView {
 
     private final StatusBar statusBar;
 
+    private final CodeToolBar toolBar;
+
     public CodePanel (EditorDocument editorDocument) {
         this.editorDocument = editorDocument;
 
         setLayout(new BorderLayout());
 
+        toolBar = new CodeToolBar();
+
+        add(toolBar, BorderLayout.NORTH);
+
         textArea = new RSyntaxTextArea(editorDocument.getContents(), 20, 60);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
         textArea.setCodeFoldingEnabled(true);
-        RTextScrollPane sp = new RTextScrollPane(textArea);
+        RTextScrollPane scrollPane = new RTextScrollPane(textArea);
+
+        add(scrollPane, BorderLayout.CENTER);
 
         statusBar = new StatusBar(editorDocument);
 
-        add(sp, BorderLayout.CENTER);
         add(statusBar, BorderLayout.SOUTH);
 
         initModelListener();
