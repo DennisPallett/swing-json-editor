@@ -6,6 +6,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.editor.CaretPositionListener;
 import nl.pallett.jsoneditor.view.editor.CodePanelView;
@@ -20,6 +21,8 @@ public class CodePanel extends JPanel implements CodePanelView {
 
     private final AdaptiveScroller scroller = new AdaptiveScroller();
 
+    private final StatusBar statusBar;
+
     public CodePanel (EditorDocument editorDocument) {
         this.editorDocument = editorDocument;
 
@@ -29,7 +32,11 @@ public class CodePanel extends JPanel implements CodePanelView {
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
-        add(sp);
+
+        statusBar = new StatusBar();
+
+        add(sp, BorderLayout.CENTER);
+        add(statusBar, BorderLayout.SOUTH);
 
         initModelListener();
         initChangeListener();
@@ -38,8 +45,24 @@ public class CodePanel extends JPanel implements CodePanelView {
     @Override
     public void addCaretListener(CaretPositionListener listener) {
         textArea.addCaretListener(event -> {
-            listener.onCaretPositionChanged(event.getDot(), event.getMark());
+            int caretPos = textArea.getCaretPosition();
+
+            int line = 0;
+            int column = 0;
+            try {
+                line = textArea.getLineOfOffset(caretPos);
+                int lineStart = textArea.getLineStartOffset(line);
+                column = caretPos - lineStart;
+            } catch (BadLocationException e) {
+                // ignore for now
+            }
+            listener.onCaretPositionChanged(event.getDot(), event.getMark(), line+1, column);
         });
+    }
+
+    @Override
+    public void updateStatusBar(int line, int column) {
+        statusBar.updateStatusBar(line, column);
     }
 
     @Override
@@ -63,8 +86,8 @@ public class CodePanel extends JPanel implements CodePanelView {
     }
 
     @Override
-    public void scrollTo(int offset) {
-        scroller.scrollToOffsetAdaptive(textArea, offset);
+    public void scrollTo(int offset, Runnable runWhenFinished) {
+        scroller.scrollToOffsetAdaptive(textArea, offset, runWhenFinished);
     }
 
     private void initModelListener() {

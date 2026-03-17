@@ -1,20 +1,25 @@
 package nl.pallett.jsoneditor.ui.editor.code;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-
-import javax.swing.*;
+import java.awt.Point;
+import java.awt.Rectangle;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.text.BadLocationException;
-import java.awt.*;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 public class AdaptiveScroller {
 
     private Timer timer;
 
-    public void scrollToOffsetAdaptive(RSyntaxTextArea textArea, int offset) {
+    public void scrollToOffsetAdaptive(RSyntaxTextArea textArea, int offset, Runnable runWhenFinished) {
         try {
             Rectangle target = textArea.modelToView2D(offset).getBounds();
             JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, textArea);
-            if (viewport == null) return;
+            if (viewport == null) {
+                runWhenFinished.run();
+                return;
+            }
 
             Rectangle visible = viewport.getViewRect();
             int margin = 40;
@@ -23,6 +28,7 @@ public class AdaptiveScroller {
             // Already visible → instant
             if (visible.contains(target)) {
                 textArea.setCaretPosition(offset);
+                runWhenFinished.run();
                 return;
             }
 
@@ -56,6 +62,7 @@ public class AdaptiveScroller {
                     ((Timer) e.getSource()).stop();
                     viewport.setViewPosition(end);
                     textArea.setCaretPosition(offset); // caret at end
+                    runWhenFinished.run();
                 }
             });
 
