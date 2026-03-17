@@ -1,14 +1,17 @@
 package nl.pallett.jsoneditor.ui.editor.tree;
 
+import java.awt.BorderLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.editor.NodeSelectedListener;
 import nl.pallett.jsoneditor.view.editor.TreePanelView;
-
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import java.awt.*;
 
 public class TreePanel extends JPanel implements TreePanelView {
     private final EditorDocument editorDocument;
@@ -16,6 +19,8 @@ public class TreePanel extends JPanel implements TreePanelView {
     private final TreeBuilder treeBuilder = new TreeBuilder();
 
     private final JTree tree;
+
+    private AstIntervalIndex astIntervalIndex = null;
 
     public TreePanel (EditorDocument editorDocument) {
         this.editorDocument = editorDocument;
@@ -54,6 +59,31 @@ public class TreePanel extends JPanel implements TreePanelView {
         });
     }
 
+    @Override
+    public void selectNodeForCaretPosition(int caretPosition) {
+        if (astIntervalIndex != null) {
+            AstNode node = astIntervalIndex.findDeepest(caretPosition);
+
+            if (node != null) {
+                selectAndReveal(node);
+            }
+        }
+    }
+
+    public void selectAndReveal(AstNode node) {
+        DefaultMutableTreeNode item = astIntervalIndex.getTreeItemForNode(node);
+        if (item == null) {
+            return;
+        }
+
+        TreePath path = new TreePath(item.getPath());
+        tree.expandPath(path);
+
+        // Select the item
+        tree.setSelectionPath(path);
+        tree.scrollPathToVisible(path);
+    }
+
     private void addAstListener() {
         editorDocument.addPropertyChangeListener(event -> {
             if (event.getPropertyName().equals(EditorDocument.Property.AST_TREE.name())) {
@@ -67,6 +97,8 @@ public class TreePanel extends JPanel implements TreePanelView {
         if (astTree != null) {
             DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree);
             tree.setModel(new DefaultTreeModel(newRoot));
+
+            astIntervalIndex = new AstIntervalIndex(newRoot);
         }
     }
 }

@@ -21,6 +21,10 @@ public class EditorController {
                 scrollTo(astNode.startOffset);
             }
         });
+
+        codePanelView.addCaretListener((startOffset, endOffset) -> {
+            treePanelView.selectNodeForCaretPosition(startOffset);
+        });
     }
 
     private void scrollTo(int offset) {

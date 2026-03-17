@@ -6,4 +6,5 @@ public interface CodePanelView {
     boolean canUndo();
     boolean canRedo();
     void scrollTo(int offset);
+    void addCaretListener(CaretPositionListener listener);
 }
