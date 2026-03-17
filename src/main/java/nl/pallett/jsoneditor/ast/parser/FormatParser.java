@@ -1,6 +1,6 @@
-package nl.pallett.jsoneditor.editor.parser;
+package nl.pallett.jsoneditor.ast.parser;
 
-import nl.pallett.jsoneditor.editor.ast.AstNode;
+import nl.pallett.jsoneditor.ast.AstNode;
 
 import java.io.IOException;
 

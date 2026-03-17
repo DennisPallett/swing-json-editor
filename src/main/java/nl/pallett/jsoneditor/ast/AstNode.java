@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor.editor.ast;
+package nl.pallett.jsoneditor.ast;
 
 import org.jspecify.annotations.Nullable;
 

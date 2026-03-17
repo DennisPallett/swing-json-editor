@@ -1,9 +1,9 @@
-package nl.pallett.jsoneditor.editor.parser;
+package nl.pallett.jsoneditor.ast.parser;
 
-import nl.pallett.jsoneditor.editor.ast.ArrayIndexPointer;
-import nl.pallett.jsoneditor.editor.ast.AstNode;
-import nl.pallett.jsoneditor.editor.ast.FieldPointer;
-import nl.pallett.jsoneditor.editor.ast.PointerType;
+import nl.pallett.jsoneditor.ast.ArrayIndexPointer;
+import nl.pallett.jsoneditor.ast.AstNode;
+import nl.pallett.jsoneditor.ast.FieldPointer;
+import nl.pallett.jsoneditor.ast.PointerType;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.events.*;
 import org.snakeyaml.engine.v2.exceptions.Mark;

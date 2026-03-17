@@ -1,10 +1,10 @@
 package nl.pallett.jsoneditor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import nl.pallett.jsoneditor.editor.ast.AstNode;
-import nl.pallett.jsoneditor.editor.parser.FormatParser;
-import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
-import nl.pallett.jsoneditor.editor.parser.YamlParserAdapter;
+import nl.pallett.jsoneditor.ast.AstNode;
+import nl.pallett.jsoneditor.ast.parser.FormatParser;
+import nl.pallett.jsoneditor.ast.parser.JsonParserAdapter;
+import nl.pallett.jsoneditor.ast.parser.YamlParserAdapter;
 import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import nl.pallett.jsoneditor.util.StringUtil;
@@ -77,6 +77,8 @@ public class EditorDocument {
     public void setDocumentType(DocumentType documentType) {
         DocumentType oldType = this.documentType;
         this.documentType = documentType;
+
+        // TODO: auto-convert existing contents (using AST tree) to new document type
 
         pcs.firePropertyChange(Property.DOCUMENT_TYPE.name(), oldType, documentType);
     }

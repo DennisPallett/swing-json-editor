@@ -1,17 +1,15 @@
 package nl.pallett.jsoneditor.ui.editor.tree;
 
-import java.awt.BorderLayout;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import nl.pallett.jsoneditor.editor.ast.AstNode;
+import nl.pallett.jsoneditor.ast.AstNode;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.editor.NodeSelectedListener;
 import nl.pallett.jsoneditor.view.editor.TreePanelView;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import java.awt.*;
 
 public class TreePanel extends JPanel implements TreePanelView {
     private final EditorDocument editorDocument;

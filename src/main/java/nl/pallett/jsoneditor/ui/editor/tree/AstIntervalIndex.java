@@ -1,12 +1,13 @@
 package nl.pallett.jsoneditor.ui.editor.tree;
 
+import nl.pallett.jsoneditor.ast.AstNode;
+import org.jspecify.annotations.Nullable;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.tree.DefaultMutableTreeNode;
-import nl.pallett.jsoneditor.editor.ast.AstNode;
-import org.jspecify.annotations.Nullable;
 
 public class AstIntervalIndex {
 

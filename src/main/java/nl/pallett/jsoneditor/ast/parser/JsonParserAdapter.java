@@ -1,17 +1,14 @@
-package nl.pallett.jsoneditor.editor.parser;
+package nl.pallett.jsoneditor.ast.parser;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.*;
+import nl.pallett.jsoneditor.ast.ArrayIndexPointer;
+import nl.pallett.jsoneditor.ast.AstNode;
+import nl.pallett.jsoneditor.ast.FieldPointer;
+import nl.pallett.jsoneditor.ast.PointerType;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import nl.pallett.jsoneditor.editor.ast.ArrayIndexPointer;
-import nl.pallett.jsoneditor.editor.ast.AstNode;
-import nl.pallett.jsoneditor.editor.ast.FieldPointer;
-import nl.pallett.jsoneditor.editor.ast.PointerType;
 
 public class JsonParserAdapter implements FormatParser {
 

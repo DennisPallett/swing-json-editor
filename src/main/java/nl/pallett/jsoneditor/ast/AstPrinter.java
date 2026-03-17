@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor.editor.ast;
+package nl.pallett.jsoneditor.ast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package nl.pallett.jsoneditor.ui.editor.tree;
 
-import nl.pallett.jsoneditor.editor.ast.AstNode;
+import nl.pallett.jsoneditor.ast.AstNode;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.tree.DefaultMutableTreeNode;
