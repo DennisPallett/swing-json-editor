@@ -8,6 +8,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.model.EditorDocument.Property;
 import nl.pallett.jsoneditor.view.editor.CaretPositionListener;
 import nl.pallett.jsoneditor.view.editor.CodePanelView;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -33,7 +34,7 @@ public class CodePanel extends JPanel implements CodePanelView {
         textArea.setCodeFoldingEnabled(true);
         RTextScrollPane sp = new RTextScrollPane(textArea);
 
-        statusBar = new StatusBar();
+        statusBar = new StatusBar(editorDocument);
 
         add(sp, BorderLayout.CENTER);
         add(statusBar, BorderLayout.SOUTH);
@@ -100,6 +101,10 @@ public class CodePanel extends JPanel implements CodePanelView {
                     // Must update on EDT
                     SwingUtilities.invokeLater(() -> textArea.setText(newContentsEvent.newContent()));
                 }
+            }
+
+            if (Property.IS_VALID.name().equals(evt.getPropertyName())) {
+                statusBar.updateStatusBar(editorDocument.isValid(), editorDocument.getParseException());
             }
         });
     }

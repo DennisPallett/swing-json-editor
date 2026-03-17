@@ -1,6 +1,11 @@
 package nl.pallett.jsoneditor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.parser.FormatParser;
 import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
@@ -9,12 +14,6 @@ import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import nl.pallett.jsoneditor.util.StringUtil;
 import org.jspecify.annotations.Nullable;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class EditorDocument {
     public enum ContentsSource {
@@ -27,7 +26,8 @@ public class EditorDocument {
         CONTENTS,
         AST_TREE,
         DIRTY_MARK,
-        FILE_PATH
+        FILE_PATH,
+        IS_VALID
     }
 
     public record ContentsChangedEvent (String oldContent, String newContent, ContentsSource source) {}
@@ -47,6 +47,10 @@ public class EditorDocument {
     private long dirtyChecksum;
 
     private DocumentType documentType = DocumentType.JSON;
+
+    private boolean valid;
+
+    private @Nullable Exception parseException = null;
 
     public EditorDocument (String name, @Nullable Path filePath) {
         this.name = name;
@@ -94,6 +98,14 @@ public class EditorDocument {
         this.name = filePath.getFileName().toString();
 
         pcs.firePropertyChange(Property.FILE_PATH.name(), oldFilePath, filePath);
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public Exception getParseException() {
+        return parseException;
     }
 
     public String getContents() {
@@ -185,9 +197,21 @@ public class EditorDocument {
         try {
             astTree = parser.parse(getContents());
             pcs.firePropertyChange(Property.AST_TREE.name(), oldTree, astTree);
+
+            setIsValid(true, null);
         } catch (IOException e) {
+            setIsValid(false, e);
+
             // TODO: handle exrror
             System.err.println(e.getMessage());
         }
+    }
+
+    private void setIsValid(boolean valid, @Nullable Exception exception) {
+        boolean oldValid = this.valid;
+        this.valid = valid;
+        this.parseException = exception;
+
+        pcs.firePropertyChange(Property.IS_VALID.name(), oldValid, this.valid);
     }
 }

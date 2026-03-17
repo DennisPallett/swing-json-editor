@@ -2,16 +2,16 @@ package nl.pallett.jsoneditor.editor.parser;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import nl.pallett.jsoneditor.editor.ast.ArrayIndexPointer;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.ast.FieldPointer;
 import nl.pallett.jsoneditor.editor.ast.PointerType;
-
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 public class JsonParserAdapter implements FormatParser {
 
@@ -30,7 +30,7 @@ public class JsonParserAdapter implements FormatParser {
     }
 
     @Override
-    public AstNode parse(String text) throws IOException {
+    public AstNode parse(String text) throws IOException, JsonParseException {
         JsonParser parser = factory.createParser(text);
 
         pointerStack.push(new FieldPointer("$"));
