@@ -1,12 +1,5 @@
 package nl.pallett.jsoneditor.ui.editor.code;
 
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.model.EditorDocument.Property;
 import nl.pallett.jsoneditor.view.editor.CaretPositionListener;
@@ -14,6 +7,12 @@ import nl.pallett.jsoneditor.view.editor.CodePanelView;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import java.awt.*;
 
 public class CodePanel extends JPanel implements CodePanelView {
     private final EditorDocument editorDocument;
@@ -31,13 +30,13 @@ public class CodePanel extends JPanel implements CodePanelView {
 
         setLayout(new BorderLayout());
 
-        toolBar = new CodeToolBar();
+        toolBar = new CodeToolBar(editorDocument);
 
         add(toolBar, BorderLayout.NORTH);
 
         textArea = new RSyntaxTextArea(editorDocument.getContents(), 20, 60);
-        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
         textArea.setCodeFoldingEnabled(true);
+        setSyntaxStyle();
         RTextScrollPane scrollPane = new RTextScrollPane(textArea);
 
         add(scrollPane, BorderLayout.CENTER);
@@ -100,7 +99,7 @@ public class CodePanel extends JPanel implements CodePanelView {
 
     private void initModelListener() {
         editorDocument.addPropertyChangeListener(evt -> {
-            if (EditorDocument.Property.CONTENTS.name().equals(evt.getPropertyName())) {
+            if (Property.CONTENTS.name().equals(evt.getPropertyName())) {
                 EditorDocument.ContentsChangedEvent newContentsEvent = (EditorDocument.ContentsChangedEvent) evt.getNewValue();
 
                 // Avoid updating if the editor already has the same text
@@ -112,6 +111,10 @@ public class CodePanel extends JPanel implements CodePanelView {
 
             if (Property.IS_VALID.name().equals(evt.getPropertyName())) {
                 statusBar.updateStatusBar(editorDocument.isValid(), editorDocument.getParseException());
+            }
+
+            if (Property.DOCUMENT_TYPE.name().equals(evt.getPropertyName())) {
+                setSyntaxStyle();
             }
         });
     }
@@ -148,5 +151,13 @@ public class CodePanel extends JPanel implements CodePanelView {
                 restartTimer();
             }
         });
+    }
+
+    private void setSyntaxStyle() {
+        String syntaxStyle = switch(editorDocument.getDocumentType()) {
+            case JSON -> SyntaxConstants.SYNTAX_STYLE_JSON;
+            case YAML -> SyntaxConstants.SYNTAX_STYLE_YAML;
+        };
+        textArea.setSyntaxEditingStyle(syntaxStyle);
     }
 }

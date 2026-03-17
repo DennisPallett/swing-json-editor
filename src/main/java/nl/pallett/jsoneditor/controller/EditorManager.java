@@ -40,9 +40,8 @@ public class EditorManager {
         FileOpenIntegration.setFileOpenHandler(this::openFile);
         FileOpenIntegration.markReady();
 
-        tabbedView.addChangeEditorPanelListener(
-            activeEditorPanel -> this.actionManager.updateState(activeEditorPanel)
-        );
+        tabbedView.addChangeEditorPanelListener(actionManager::updateState);
+        tabbedView.addCloseEditorPanelListener(this::closeDocument);
     }
 
     public void newDocument() {
@@ -109,6 +108,20 @@ public class EditorManager {
 
     public ActionManager getActionManager() {
         return actionManager;
+    }
+
+    private void closeDocument(@Nullable EditorPanelView editorPanelView) {
+        if (editorPanelView != null) {
+            EditorDocument editorDocument = openDocuments.entrySet()
+                .stream()
+                .filter(entry -> Objects.equals(entry.getValue(), editorPanelView))
+                .map(e -> e.getKey())
+                .findFirst().orElse(null);
+
+            if (editorDocument != null) {
+                openDocuments.remove(editorDocument);
+            }
+        }
     }
 
     public @Nullable EditorDocument getActiveDocument() {

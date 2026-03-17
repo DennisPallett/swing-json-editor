@@ -9,6 +9,8 @@ import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ContainerAdapter;
+import java.awt.event.ContainerEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.EventListener;
@@ -21,14 +23,17 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
         enableTabReordering(this);
     }
 
+    @Override
     public void setEditorManager(EditorManager editorManager) {
         this.editorManager = editorManager;
     }
 
+    @Override
     public @Nullable EditorPanelView getActiveEditorPanel() {
         return (EditorPanelView) this.getSelectedComponent();
     }
 
+    @Override
     public void addChangeEditorPanelListener(ChangeEditorPanelListener listener) {
         addChangeListener(e -> {
             Component selected = getSelectedComponent();
@@ -37,6 +42,21 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
                 listener.onTabChange(editorPanelView);
             } else {
                 listener.onTabChange(null);
+            }
+        });
+    }
+
+    @Override
+    public void addCloseEditorPanelListener(CloseEditorPanelListener listener) {
+        addContainerListener(new ContainerAdapter() {
+            @Override
+            public void componentRemoved(ContainerEvent e) {
+                Component removed = e.getChild();
+                if (removed instanceof EditorPanelView editorPanelView) {
+                    listener.onTabClose(editorPanelView);
+                } else {
+                    listener.onTabClose(null);
+                }
             }
         });
     }
@@ -70,6 +90,10 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
 
     public interface ChangeEditorPanelListener extends EventListener {
         void onTabChange(@Nullable EditorPanelView editorPanel);
+    }
+
+    public interface CloseEditorPanelListener extends EventListener {
+        void onTabClose(@Nullable EditorPanelView editorPanel);
     }
 
 

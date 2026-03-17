@@ -1,11 +1,6 @@
 package nl.pallett.jsoneditor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import nl.pallett.jsoneditor.editor.ast.AstNode;
 import nl.pallett.jsoneditor.editor.parser.FormatParser;
 import nl.pallett.jsoneditor.editor.parser.JsonParserAdapter;
@@ -14,6 +9,12 @@ import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import nl.pallett.jsoneditor.util.StringUtil;
 import org.jspecify.annotations.Nullable;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class EditorDocument {
     public enum ContentsSource {
@@ -27,7 +28,8 @@ public class EditorDocument {
         AST_TREE,
         DIRTY_MARK,
         FILE_PATH,
-        IS_VALID
+        IS_VALID,
+        DOCUMENT_TYPE
     }
 
     public record ContentsChangedEvent (String oldContent, String newContent, ContentsSource source) {}
@@ -57,15 +59,15 @@ public class EditorDocument {
         this.filePath = filePath;
 
         if (filePath != null) {
+            String extension = FileUtil.getExtension(filePath);
+            documentType = extension.equals("json") ? DocumentType.JSON : DocumentType.YAML;
+
             try {
                 setContents(Files.readString(filePath), ContentsSource.OTHER);
             } catch (IOException e) {
                 // TODO: handle this error
                 System.err.println("Failed to read file: " + e.getMessage());
             }
-
-            String extension = FileUtil.getExtension(filePath);
-            documentType = extension.equals("json") ? DocumentType.JSON : DocumentType.YAML;
         }
 
         // reset dirty mark on init to mark as "fresh"
@@ -73,7 +75,10 @@ public class EditorDocument {
     }
 
     public void setDocumentType(DocumentType documentType) {
+        DocumentType oldType = this.documentType;
         this.documentType = documentType;
+
+        pcs.firePropertyChange(Property.DOCUMENT_TYPE.name(), oldType, documentType);
     }
 
     public DocumentType getDocumentType() {
@@ -108,8 +113,20 @@ public class EditorDocument {
         return parseException;
     }
 
+    public boolean hasContents() {
+        return contents != null && !contents.isBlank();
+    }
+
     public String getContents() {
         return contents;
+    }
+
+    private void autoDetectDocumentType(String contents) {
+        if (contents.contains("{") || contents.contains("[")) {
+            setDocumentType(DocumentType.JSON);
+        } else {
+            setDocumentType(DocumentType.YAML);
+        }
     }
 
     public void setContents(String newContents, ContentsSource contentsSource) {
@@ -118,11 +135,16 @@ public class EditorDocument {
             return;
         }
 
-        String old = this.contents;
+        // when pasting in new content try to auto-detect the document type
+        if (!this.hasContents() && this.getFilePath() == null) {
+            autoDetectDocumentType(newContents);
+        }
+
+        String oldContents = this.contents;
         this.contents = newContents;
 
         pcs.firePropertyChange(Property.CONTENTS.name(), null,
-            new ContentsChangedEvent(old, this.contents, contentsSource));
+            new ContentsChangedEvent(oldContents, this.contents, contentsSource));
 
         // when setting new contents calculate new hash for dirty property
         recalculateDirtyMark();
@@ -201,9 +223,6 @@ public class EditorDocument {
             setIsValid(true, null);
         } catch (IOException e) {
             setIsValid(false, e);
-
-            // TODO: handle exrror
-            System.err.println(e.getMessage());
         }
     }
 
