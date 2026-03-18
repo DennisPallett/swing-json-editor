@@ -1,7 +1,9 @@
 package nl.pallett.jsoneditor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import nl.pallett.jsoneditor.editor.EditorMode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.pallett.jsoneditor.model.DocumentType;
+import org.jspecify.annotations.Nullable;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.api.lowlevel.Compose;
@@ -27,8 +29,8 @@ public class StringUtil {
         return line.substring(0, i);
     }
 
-    public static String formatCode(EditorMode editorMode, String content) throws JsonProcessingException {
-        if (editorMode == EditorMode.YAML) {
+    public static String formatCode(DocumentType documentType, String content) throws JsonProcessingException {
+        if (documentType == DocumentType.YAML) {
             return formatYaml(content);
         } else {
             return formatJson(content);
@@ -63,5 +65,15 @@ public class StringUtil {
 
         List<Event> events = serialize.serializeOne(node.get());
         return present.emitToString(events.iterator());
+    }
+
+    public static @Nullable String convertOjectTreeToString(@Nullable Object objectTree, DocumentType documentType
+    ) throws JsonProcessingException {
+        if (objectTree == null) {
+            return null;
+        }
+
+        ObjectMapper objectMapper = ObjectMapperUtil.getInstance(documentType);
+        return objectMapper.writeValueAsString(objectTree);
     }
 }

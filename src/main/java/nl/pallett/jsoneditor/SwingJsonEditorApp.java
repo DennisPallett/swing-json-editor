@@ -1,132 +1,73 @@
 package nl.pallett.jsoneditor;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.MenuBar;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import nl.pallett.jsoneditor.editor.EditorManager;
-import nl.pallett.jsoneditor.menu.EditMenu;
-import nl.pallett.jsoneditor.menu.FileMenu;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import nl.pallett.jsoneditor.ui.MainFrame;
 
+import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.util.List;
 
-public class SwingJsonEditorApp extends Application {
+public class SwingJsonEditorApp {
     public static final String APP_ID = "nl.pallett.jsoneditor";
 
-    private final EditorManager editorManager = new EditorManager();
+    static void main(String[] args) {
+        // macOS specific settings BEFORE Swing starts
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("apple.awt.application.name", "Swing JSON Editor");
+        System.setProperty("flatlaf.useWindowDecorations", "true");
 
-    private Stage stage;
-
-    public static void main(String[] args) {
-        launch(args);
+        // Start Swing app on the Event Dispatch Thread
+        SwingUtilities.invokeLater(() -> {
+            setLookAndFeel();
+            setupMacHandlers(args);
+            FlatMacLightLaf.setup();
+            new MainFrame();
+        });
     }
 
-    @Override
-    public void start(Stage stage) {
-        this.stage = stage;
 
-        Parameters params = getParameters();
-        List<String> launchArgs = params.getRaw();
-        preventDuplicateInstances(launchArgs);
-
-        BorderPane root = new BorderPane();
-        root.setCenter(editorManager.getTabPane());
-
-        // ---- Menu Bar ----
-        MenuBar menuBar = new MenuBar();
-        menuBar.setUseSystemMenuBar(true);
-
-        menuBar.getMenus().addAll(
-                new FileMenu(editorManager, stage),
-                new EditMenu(editorManager)
-        );
-        root.setTop(menuBar);
-
-        Scene scene = new Scene(root, 1000, 800);
-        scene.getStylesheets().addAll(
-                getClass().getResource("/json-editor.css").toExternalForm(),
-                getClass().getResource("/style.css").toExternalForm(),
-                getClass().getResource("/json-tree.css").toExternalForm()
-
-        );
-
-        stage.initStyle(StageStyle.DECORATED);
-        stage.setTitle("Swing JSON/YAML Editor");
-        stage.setScene(scene);
-        stage.show();
-
-        stage.setOnCloseRequest(event -> {
-            if (editorManager.anyDirtyDocuments()) {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setHeaderText("Unsaved files");
-                alert.setContentText("There are unsaved files!\n\nAre you sure you want to close before saving?");
-
-                if (alert.showAndWait().get() != ButtonType.OK) {
-                    event.consume();
-                }
-            }
-        });
-
-        // open application with an initial empty JSON document if no initial file has been opened
-        if (!editorManager.anyOpenDocuments()) {
-            editorManager.openDocument(null, "");
+    private static void setLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(
+                UIManager.getSystemLookAndFeelClassName()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    @Override
-    public void init() {
+    private static void setupMacHandlers(String[] args) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
 
-            desktop.setOpenFileHandler(event -> {
-                for (File file : event.getFiles()) {
-                    Platform.runLater(() -> {
-                        editorManager.openDocument(file.toPath());
-                        bringToFront();
-                    });
+            desktop.setAboutHandler(e ->
+                JOptionPane.showMessageDialog(null,
+                    "Swing JSON Editor\nVersion 1.0",
+                    "About",
+                    JOptionPane.INFORMATION_MESSAGE)
+            );
+
+//            desktop.setOpenFileHandler(e -> {
+//                e.getFiles().forEach(f -> JOptionPane.showMessageDialog(null,
+//                    "Open file: " + e.getFiles(),
+//                    "Open file",
+//                    JOptionPane.INFORMATION_MESSAGE));
+//            });
+            FileOpenIntegration.init(args);
+
+            desktop.setQuitHandler((e, response) -> {
+                int result = JOptionPane.showConfirmDialog(
+                    null,
+                    "Quit application?",
+                    "Quit",
+                    JOptionPane.YES_NO_OPTION
+                );
+
+                if (result == JOptionPane.YES_OPTION) {
+                    response.performQuit();
+                } else {
+                    response.cancelQuit();
                 }
             });
         }
-
-
-    }
-
-    public static void showError(Exception ex) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
-        alert.showAndWait();
-    }
-
-    private void preventDuplicateInstances (List<String> launchArgs) {
-        boolean isPrimary = SingleInstanceManager.startServer(files -> {
-            Platform.runLater(() -> {
-                editorManager.openDocuments(files);
-                bringToFront();
-            });
-        });
-
-        if (!isPrimary) {
-            // Send args to running instance
-            SingleInstanceManager.sendToRunningInstance(launchArgs);
-            System.exit(0);
-        }
-    }
-
-    private static void bringToFront() {
-        Platform.runLater(() -> {
-            for (Stage stage : Stage.getWindows()
-                    .filtered(w -> w instanceof Stage)
-                    .stream()
-                    .map(w -> (Stage) w)
-                    .toList()) {
-                stage.toFront();
-            }
-        });
     }
 }

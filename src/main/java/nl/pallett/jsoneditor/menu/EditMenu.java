@@ -1,44 +1,29 @@
 package nl.pallett.jsoneditor.menu;
 
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import nl.pallett.jsoneditor.editor.EditorManager;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+import nl.pallett.jsoneditor.actions.ActionManager;
+import nl.pallett.jsoneditor.actions.ActionManager.Action;
+import nl.pallett.jsoneditor.controller.EditorManager;
 
-public class EditMenu extends Menu {
-    private final EditorManager editorManager;
+public class EditMenu extends JMenu  {
 
     public EditMenu(EditorManager editorManager) {
         super("Edit");
-        this.editorManager = editorManager;
+        ActionManager actionManager = editorManager.getActionManager();
 
-        MenuItem undoItem = new MenuItem("Undo");
-        MenuItem redoItem = new MenuItem("Redo");
-        MenuItem formatJsonItem = new MenuItem("Format JSON");
+        var undoItem = new JMenuItem(actionManager.getAction(Action.UNDO));
+        var redoItem = new JMenuItem(actionManager.getAction(Action.REDO));
+        var formatJsonItem = new JMenuItem(actionManager.getAction(Action.FORMAT));
 
-        undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN));
-        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        formatJsonItem.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN));
+        undoItem.setAccelerator(KeyStroke.getKeyStroke("meta Z"));
+        redoItem.setAccelerator(KeyStroke.getKeyStroke("meta shift Z"));
+        formatJsonItem.setAccelerator(KeyStroke.getKeyStroke("meta alt L"));
 
-        getItems().addAll(
-                undoItem,
-                redoItem,
-                new SeparatorMenuItem(),
-                formatJsonItem
-        );
-
-        formatJsonItem.setOnAction(e -> formatJson());
-        undoItem.setOnAction(e -> editorManager.getActiveEditor().undo());
-        redoItem.setOnAction(e -> editorManager.getActiveEditor().redo());
-
-        undoItem.disableProperty().bind(editorManager.undoAvailableProperty().not());
-        redoItem.disableProperty().bind(editorManager.redoAvailableProperty().not());
-    }
-
-    private void formatJson() {
-        editorManager.getActiveDocument().formatContent();
+        add(undoItem);
+        add(redoItem);
+        addSeparator();
+        add(formatJsonItem);
     }
 }

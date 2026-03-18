@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import nl.pallett.jsoneditor.editor.EditorMode;
+import nl.pallett.jsoneditor.model.DocumentType;
 
 public class ObjectMapperUtil {
     private static ObjectMapper objectMapperJson;
@@ -31,7 +31,7 @@ public class ObjectMapperUtil {
         return objectMapperYaml;
     }
 
-    public static ObjectMapper getInstance(EditorMode editorMode) {
+    public static ObjectMapper getInstance(DocumentType editorMode) {
         return switch(editorMode) {
             case JSON -> getJsonInstance();
             case YAML -> getYamlInstance();
