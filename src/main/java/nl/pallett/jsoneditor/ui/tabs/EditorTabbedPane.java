@@ -13,7 +13,9 @@ import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.EventListener;
+import java.util.Optional;
 
 public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
     private EditorManager editorManager;
@@ -74,6 +76,17 @@ public class EditorTabbedPane extends JTabbedPane implements EditorTabbedView {
         setSelectedIndex(index);
 
         return editorPanel;
+    }
+
+    @Override
+    public void showTab(EditorPanelView editorPanel) {
+        Optional<Component> tabComponent = Arrays.stream(getComponents())
+            .filter(component -> component == editorPanel).findFirst();
+
+        if (tabComponent.isPresent()) {
+            int index = indexOfComponent(tabComponent.get());
+            setSelectedIndex(index);
+        }
     }
 
     private static void enableTabReordering(JTabbedPane tabbedPane) {

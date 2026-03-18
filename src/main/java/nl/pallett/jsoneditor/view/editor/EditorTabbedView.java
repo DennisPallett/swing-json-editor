@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 
 public interface EditorTabbedView {
     EditorPanelView addTab(EditorDocument editorDocument);
+    void showTab(EditorPanelView editorPanel);
     void setEditorManager(EditorManager editorManager);
     @Nullable EditorPanelView getActiveEditorPanel();
     void addChangeEditorPanelListener(ChangeEditorPanelListener listener);

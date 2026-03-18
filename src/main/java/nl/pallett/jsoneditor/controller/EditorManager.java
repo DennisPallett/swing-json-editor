@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class EditorManager {
 
@@ -96,6 +97,16 @@ public class EditorManager {
     }
 
     public void openFile(Path file) {
+        Optional<EditorPanelView> alreadyOpenEditor = openDocuments.entrySet().stream()
+            .filter(entry -> file.equals(entry.getKey().getFilePath()))
+            .map(Map.Entry::getValue)
+            .findFirst();
+
+        if (alreadyOpenEditor.isPresent()) {
+            tabbedView.showTab(alreadyOpenEditor.get());
+            return;
+        }
+
         EditorDocument document = new EditorDocument(file.getFileName().toString(), file);
         EditorPanelView editorPanelView = tabbedView.addTab(document);
 

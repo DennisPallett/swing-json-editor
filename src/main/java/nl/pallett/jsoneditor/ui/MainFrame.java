@@ -18,8 +18,8 @@ public class MainFrame extends JFrame implements MainView {
     public MainFrame() {
         super("Swing JSON Editor");
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(1000, 800);
         setLocationRelativeTo(null);
 
         EditorTabbedPane editorTabbedPane = new EditorTabbedPane();
