@@ -1,10 +1,9 @@
 package nl.pallett.jsoneditor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.StringReader;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.pallett.jsoneditor.model.DocumentType;
+import org.jspecify.annotations.Nullable;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.api.lowlevel.Compose;
@@ -12,6 +11,10 @@ import org.snakeyaml.engine.v2.api.lowlevel.Present;
 import org.snakeyaml.engine.v2.api.lowlevel.Serialize;
 import org.snakeyaml.engine.v2.events.Event;
 import org.snakeyaml.engine.v2.nodes.Node;
+
+import java.io.StringReader;
+import java.util.List;
+import java.util.Optional;
 
 public class StringUtil {
     private StringUtil() {
@@ -62,5 +65,15 @@ public class StringUtil {
 
         List<Event> events = serialize.serializeOne(node.get());
         return present.emitToString(events.iterator());
+    }
+
+    public static @Nullable String convertOjectTreeToString(@Nullable Object objectTree, DocumentType documentType
+    ) throws JsonProcessingException {
+        if (objectTree == null) {
+            return null;
+        }
+
+        ObjectMapper objectMapper = ObjectMapperUtil.getInstance(documentType);
+        return objectMapper.writeValueAsString(objectTree);
     }
 }

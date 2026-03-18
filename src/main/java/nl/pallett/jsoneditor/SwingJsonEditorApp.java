@@ -12,7 +12,7 @@ public class SwingJsonEditorApp {
     static void main(String[] args) {
         // macOS specific settings BEFORE Swing starts
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-        System.setProperty("apple.awt.application.name", "Test");
+        System.setProperty("apple.awt.application.name", "Swing JSON Editor");
         System.setProperty("flatlaf.useWindowDecorations", "true");
 
         // Start Swing app on the Event Dispatch Thread
