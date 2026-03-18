@@ -1,6 +1,7 @@
 package nl.pallett.jsoneditor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import nl.pallett.jsoneditor.ast.AstConverter;
 import nl.pallett.jsoneditor.ast.AstNode;
 import nl.pallett.jsoneditor.ast.parser.FormatParser;
 import nl.pallett.jsoneditor.ast.parser.JsonParserAdapter;
@@ -15,7 +16,6 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 
 public class EditorDocument {
     public enum ContentsSource {
@@ -36,6 +36,8 @@ public class EditorDocument {
     public record ContentsChangedEvent (String oldContent, String newContent, ContentsSource source) {}
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+    private final AstConverter astConverter = new AstConverter();
 
     private String name;
 
@@ -106,79 +108,12 @@ public class EditorDocument {
 
     public @Nullable String exportAs(DocumentType convertTo) {
         try {
-            String converted = StringUtil.convertOjectTreeToString(toObjectTree(), convertTo);
+            String converted = StringUtil.convertOjectTreeToString(astConverter.toObjectTree(astTree), convertTo);
             return StringUtil.formatCode(documentType, converted);
         } catch (JsonProcessingException e) {
             System.err.println(e.getStackTrace());
             return null;
         }
-    }
-
-    public @Nullable Object toObjectTree() {
-        if (astTree == null) {
-            return null;
-        }
-
-        Object root = buildNode(astTree);
-        return root;
-    }
-
-    private record MapEntry (String key, Object value) {
-        public static MapEntry of (String key, Object value) {
-            return new MapEntry(key, value);
-        }
-    }
-
-    private Object buildNode(AstNode astNode) {
-        Object result = null;
-        switch (astNode.getType()) {
-            case OBJECT: {
-                Map<String, Object> map = new HashMap<>();
-                astNode.getChildren().stream()
-                    .map(childNode -> MapEntry.of(childNode.getKey(), buildNode(childNode)))
-                    .filter(entry -> entry.value() != null)
-                    .forEach(entry -> map.put(entry.key(), entry.value));
-                result = map;
-                break;
-            }
-            case ARRAY: {
-                List<Object> list = new ArrayList<>();
-                astNode.getChildren().stream()
-                    .map(this::buildNode)
-                    .filter(Objects::nonNull)
-                    .forEach(list::add);
-                result = list;
-                break;
-            }
-            case PROPERTY: {
-                result = buildNode(astNode.getChildren().getFirst());
-                break;
-            }
-            case VALUE: {
-                result = switch(astNode.getValueType()) {
-                    case STRING -> astNode.getValue();
-                    case INTEGER -> Integer.valueOf(astNode.getValue());
-                    case FLOAT -> Float.valueOf(astNode.getValue());
-                    case BOOLEAN -> Boolean.valueOf(astNode.getValue());
-                    case NULL -> null;
-                    case BLOCK -> astNode.getValue();
-                    case TIMESTAMP -> astNode.getValue();
-                };
-                break;
-            }
-            case DOCUMENT:
-                AstNode firstChildNode = astNode.getChildren().stream()
-                    .filter(childNode -> childNode.getType() != AstNode.Type.COMMENT)
-                    .findFirst()
-                    .orElse(null);
-                result = firstChildNode != null ? buildNode(firstChildNode) : null;
-                break;
-            case COMMENT, ALIAS:
-                result = null;
-                break;
-        }
-
-        return result;
     }
 
     public void setFilePath(Path filePath) {
