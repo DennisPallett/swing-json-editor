@@ -13,6 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>25</maven.compiler.release>
+    <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
 
     <jspecify.version>1.0.0</jspecify.version>
     <junit.version>5.11.0</junit.version>
@@ -167,7 +168,62 @@
       </plugins>
     </pluginManagement>
 
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>version.properties</include>
+        </includes>
+      </resource>
+
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>version.properties</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>timestamped-version</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>app.version.clean</name>
+              <value>${project.version}</value>
+              <regex>-SNAPSHOT</regex>
+              <replacement></replacement>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>4.9.10</version>
+        <configuration>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -233,6 +289,7 @@
           <mainJar>${project.build.finalName}.jar</mainJar>
           <mainClass>nl.pallett.jsoneditor.SwingJsonEditorApp</mainClass>
           <destination>${project.build.directory}/dist</destination>
+          <appVersion>${app.version.clean}</appVersion>
           <type>DMG</type>
           <removeDestination>true</removeDestination>
           <macPackageName>Swing JSON Editor</macPackageName>

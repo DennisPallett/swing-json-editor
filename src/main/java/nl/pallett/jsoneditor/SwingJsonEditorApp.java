@@ -41,7 +41,7 @@ public class SwingJsonEditorApp {
 
             desktop.setAboutHandler(e ->
                 JOptionPane.showMessageDialog(null,
-                    "Swing JSON Editor\nVersion 1.0",
+                    "Swing JSON Editor\nVersion " + VersionInfo.getFullVersion(),
                     "About",
                     JOptionPane.INFORMATION_MESSAGE)
             );
