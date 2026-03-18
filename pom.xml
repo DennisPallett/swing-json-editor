@@ -233,7 +233,7 @@
           <mainJar>${project.build.finalName}.jar</mainJar>
           <mainClass>nl.pallett.jsoneditor.SwingJsonEditorApp</mainClass>
           <destination>${project.build.directory}/dist</destination>
-          <type>APP_IMAGE</type>
+          <type>DMG</type>
           <removeDestination>true</removeDestination>
           <macPackageName>Swing JSON Editor</macPackageName>
           <icon>src/main/resources/icon/swing-icon.icns</icon>
