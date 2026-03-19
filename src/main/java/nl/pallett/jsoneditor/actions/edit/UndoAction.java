@@ -16,14 +16,14 @@ public class UndoAction extends AbstractActionWithState {
 
     @Override
     public void updateState(EditorPanelView editorPanel) {
-        setEnabled (editorPanel != null && editorPanel.canUndo());
+        setEnabled (editorPanel != null && editorPanel.getCodePanel().canUndo());
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         EditorPanelView activeEditorPanel = editorManager.getActiveEditorPanel();
         if (activeEditorPanel != null) {
-            activeEditorPanel.undo();
+            activeEditorPanel.getCodePanel().undo();
         }
     }
 }

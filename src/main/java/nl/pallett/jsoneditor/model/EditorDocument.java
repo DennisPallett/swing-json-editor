@@ -240,7 +240,7 @@ public class EditorDocument {
             pcs.firePropertyChange(Property.AST_TREE.name(), oldTree, astTree);
 
             setIsValid(true, null);
-        } catch (IOException e) {
+        } catch (Exception e) {
             setIsValid(false, e);
         }
     }

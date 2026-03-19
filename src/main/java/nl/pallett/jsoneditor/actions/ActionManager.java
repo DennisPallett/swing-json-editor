@@ -5,6 +5,9 @@ import nl.pallett.jsoneditor.actions.edit.RedoAction;
 import nl.pallett.jsoneditor.actions.edit.UndoAction;
 import nl.pallett.jsoneditor.actions.file.SaveAction;
 import nl.pallett.jsoneditor.actions.file.SaveAsAction;
+import nl.pallett.jsoneditor.actions.find.ShowFindDialogAction;
+import nl.pallett.jsoneditor.actions.find.ShowGotoLineDialogAction;
+import nl.pallett.jsoneditor.actions.find.ShowReplaceDialogAction;
 import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.view.editor.EditorPanelView;
 import org.jspecify.annotations.Nullable;
@@ -27,6 +30,9 @@ public class ActionManager {
         actions.put(Action.FORMAT, new FormatAction(editorManager));
         actions.put(Action.UNDO, new UndoAction(editorManager));
         actions.put(Action.REDO, new RedoAction(editorManager));
+        actions.put(Action.FIND, new ShowFindDialogAction(editorManager));
+        actions.put(Action.REPLACE, new ShowReplaceDialogAction(editorManager));
+        actions.put(Action.GOTO_LINE, new ShowGotoLineDialogAction(editorManager));
     }
 
     public void updateState(@Nullable EditorPanelView editorPanel) {
@@ -50,7 +56,10 @@ public class ActionManager {
         SAVE_AS,
         FORMAT,
         UNDO,
-        REDO
+        REDO,
+        FIND,
+        REPLACE,
+        GOTO_LINE
     }
 
 }

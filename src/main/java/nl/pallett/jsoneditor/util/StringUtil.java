@@ -30,6 +30,10 @@ public class StringUtil {
     }
 
     public static String formatCode(DocumentType documentType, String content) throws JsonProcessingException {
+        if (content == null || content.isBlank()) {
+            return content;
+        }
+
         if (documentType == DocumentType.YAML) {
             return formatYaml(content);
         } else {
