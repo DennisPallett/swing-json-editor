@@ -4,17 +4,27 @@ import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.model.EditorDocument.Property;
 import nl.pallett.jsoneditor.view.editor.CaretPositionListener;
 import nl.pallett.jsoneditor.view.editor.CodePanelView;
+import org.fife.rsta.ui.GoToDialog;
+import org.fife.rsta.ui.search.FindDialog;
+import org.fife.rsta.ui.search.ReplaceDialog;
+import org.fife.rsta.ui.search.SearchEvent;
+import org.fife.rsta.ui.search.SearchListener;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.SearchResult;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
-public class CodePanel extends JPanel implements CodePanelView {
+public class CodePanel extends JPanel implements CodePanelView, SearchListener {
     private final EditorDocument editorDocument;
 
     private final RSyntaxTextArea textArea;
@@ -24,6 +34,10 @@ public class CodePanel extends JPanel implements CodePanelView {
     private final StatusBar statusBar;
 
     private final CodeToolBar toolBar;
+
+    private final FindDialog findDialog;
+
+    private final ReplaceDialog replaceDialog;
 
     public CodePanel (EditorDocument editorDocument) {
         this.editorDocument = editorDocument;
@@ -44,6 +58,19 @@ public class CodePanel extends JPanel implements CodePanelView {
         statusBar = new StatusBar(editorDocument);
 
         add(statusBar, BorderLayout.SOUTH);
+
+        findDialog = new FindDialog((JFrame)SwingUtilities.getWindowAncestor(this), this);
+        replaceDialog = new ReplaceDialog((JFrame)SwingUtilities.getWindowAncestor(this), this);
+        SearchContext context = findDialog.getSearchContext();
+        replaceDialog.setSearchContext(context);
+
+        findDialog.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                textArea.clearMarkAllHighlights();
+                statusBar.updateStatusBar("");
+            }
+        });
 
         initModelListener();
         initChangeListener();
@@ -70,6 +97,45 @@ public class CodePanel extends JPanel implements CodePanelView {
     @Override
     public void updateStatusBar(int line, int column) {
         statusBar.updateStatusBar(line, column);
+    }
+
+    @Override
+    public void showFindDialog() {
+        if (replaceDialog.isVisible()) {
+            replaceDialog.setVisible(false);
+        }
+        findDialog.setVisible(true);
+    }
+
+    @Override
+    public void showReplaceDialog() {
+        if (findDialog.isVisible()) {
+            findDialog.setVisible(false);
+        }
+        replaceDialog.setVisible(true);
+    }
+
+    @Override
+    public void showGotoLineDialog() {
+        if (findDialog.isVisible()) {
+            findDialog.setVisible(false);
+        }
+        if (replaceDialog.isVisible()) {
+            replaceDialog.setVisible(false);
+        }
+        GoToDialog dialog = new GoToDialog((JFrame)SwingUtilities.getWindowAncestor(this));
+        dialog.setMaxLineNumberAllowed(textArea.getLineCount());
+        dialog.setVisible(true);
+        int line = dialog.getLineNumber();
+
+        if (line>0) {
+            try {
+                textArea.setCaretPosition(textArea.getLineStartOffset(line-1));
+            } catch (BadLocationException ble) { // Never happens
+                UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                ble.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -159,5 +225,58 @@ public class CodePanel extends JPanel implements CodePanelView {
             case YAML -> SyntaxConstants.SYNTAX_STYLE_YAML;
         };
         textArea.setSyntaxEditingStyle(syntaxStyle);
+    }
+
+    @Override
+    public void searchEvent(SearchEvent event) {
+        SearchEvent.Type type = event.getType();
+        SearchContext context = event.getSearchContext();
+        SearchResult result;
+
+        switch (type) {
+            default: // Prevent FindBugs warning later
+            case MARK_ALL:
+                result = SearchEngine.markAll(textArea, context);
+                break;
+            case FIND:
+                result = SearchEngine.find(textArea, context);
+                if (!result.wasFound() || result.isWrapped()) {
+                    UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                }
+                break;
+            case REPLACE:
+                result = SearchEngine.replace(textArea, context);
+                if (!result.wasFound() || result.isWrapped()) {
+                    UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                }
+                break;
+            case REPLACE_ALL:
+                result = SearchEngine.replaceAll(textArea, context);
+                JOptionPane.showMessageDialog(null, result.getCount() +
+                    " occurrences replaced.");
+                break;
+        }
+
+        String text;
+        if (result.wasFound()) {
+            text = "Text found; occurrences marked: " + result.getMarkedCount();
+        }
+        else if (type==SearchEvent.Type.MARK_ALL) {
+            if (result.getMarkedCount()>0) {
+                text = "Occurrences marked: " + result.getMarkedCount();
+            }
+            else {
+                text = "";
+            }
+        }
+        else {
+            text = "Text not found";
+        }
+        statusBar.updateStatusBar(text);
+    }
+
+    @Override
+    public String getSelectedText() {
+        return textArea.getSelectedText();
     }
 }

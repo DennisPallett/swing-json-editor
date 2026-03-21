@@ -14,7 +14,8 @@ public class AstNode {
         PROPERTY,
         VALUE,
         COMMENT,
-        ALIAS
+        ALIAS,
+        DUMMY_ROOT
     }
 
     public enum ValueType {
@@ -192,7 +193,15 @@ public class AstNode {
         return this.pointer != null && !this.pointer.isEmpty();
     }
 
-    public String getPointerAsJsonPath() {
+    public @Nullable String getPointerAsJsonPath() {
+        if (getType() == Type.DUMMY_ROOT) {
+            return "DUMMY_ROOT";
+        }
+
+        if (this.pointer == null) {
+            return null;
+        }
+
         List<PointerType> filtered = this.pointer.stream()
             .filter(p -> !(p instanceof NullPointer))
             .toList();

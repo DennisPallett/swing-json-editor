@@ -141,10 +141,9 @@ public class EditorDocument {
     }
 
     private void autoDetectDocumentType(String contents) {
-        if (contents.contains("{") || contents.contains("[")) {
-            setDocumentType(DocumentType.JSON);
-        } else {
-            setDocumentType(DocumentType.YAML);
+        DocumentType documentType = StringUtil.detectFormat(contents);
+        if (documentType != null) {
+            setDocumentType(documentType);
         }
     }
 
@@ -240,8 +239,9 @@ public class EditorDocument {
             pcs.firePropertyChange(Property.AST_TREE.name(), oldTree, astTree);
 
             setIsValid(true, null);
-        } catch (IOException e) {
+        } catch (Exception e) {
             setIsValid(false, e);
+            e.printStackTrace(); // TODO: add as debug logging
         }
     }
 

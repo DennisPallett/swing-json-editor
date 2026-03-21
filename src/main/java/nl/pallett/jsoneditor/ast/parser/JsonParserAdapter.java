@@ -19,7 +19,6 @@ public class JsonParserAdapter implements FormatParser {
     private final Deque<Integer> arrayIndexStack = new ArrayDeque<>();
     private final Deque<Boolean> inArrayStack = new ArrayDeque<>();
 
-    private AstNode root = null;
     private String currentField = null;
 
     public JsonParserAdapter() {
@@ -29,6 +28,9 @@ public class JsonParserAdapter implements FormatParser {
     @Override
     public AstNode parse(String text) throws IOException, JsonParseException {
         JsonParser parser = factory.createParser(text);
+
+        AstNode root = new AstNode(AstNode.Type.DUMMY_ROOT, null, null);
+        stack.push(root);
 
         pointerStack.push(new FieldPointer("$"));
 

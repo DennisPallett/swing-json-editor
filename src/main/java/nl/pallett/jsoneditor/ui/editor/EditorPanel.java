@@ -4,6 +4,7 @@ import nl.pallett.jsoneditor.controller.EditorController;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.ui.editor.code.CodePanel;
 import nl.pallett.jsoneditor.ui.editor.tree.TreePanel;
+import nl.pallett.jsoneditor.view.editor.CodePanelView;
 import nl.pallett.jsoneditor.view.editor.EditorPanelView;
 
 import javax.swing.*;
@@ -54,22 +55,7 @@ public class EditorPanel extends JPanel implements EditorPanelView {
     }
 
     @Override
-    public void undo () {
-        codePanel.undo();
-    }
-
-    @Override
-    public void redo () {
-        codePanel.redo();
-    }
-
-    @Override
-    public boolean canUndo() {
-        return codePanel.canUndo();
-    }
-
-    @Override
-    public boolean canRedo() {
-        return codePanel.canRedo();
+    public CodePanelView getCodePanel() {
+        return codePanel;
     }
 }

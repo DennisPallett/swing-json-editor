@@ -47,8 +47,7 @@ public class YamlParserAdapter implements FormatParser {
 
         pointerStack.push(new FieldPointer("$"));
 
-        AstNode root = new AstNode(AstNode.Type.DOCUMENT, null, null);
-
+        AstNode root = new AstNode(AstNode.Type.DUMMY_ROOT, null, null);
         stack.push(root);
 
         while (parser.hasNext()) {
@@ -62,17 +61,26 @@ public class YamlParserAdapter implements FormatParser {
                     AstNode doc = new AstNode(AstNode.Type.DOCUMENT, null, null);
                     setStart(doc, event.getStartMark());
 
+                    // add current fieldname (property) or a dummy value
+                    pointerStack.push(PointerType.fieldOrNullPointer(currentField));
+
+                    // add current pointer to node
+                    setPointer(doc);
+
                     attachToParent(doc);
                     stack.push(doc);
 
-                    if (root == null)
-                        root = doc;
+                    //if (root == null)
+                    //    root = doc;
 
                     break;
                 }
                 case DocumentEnd: {
                     AstNode doc = stack.pop();
                     setEnd(doc, event.getEndMark());
+
+                    if (!pointerStack.isEmpty())
+                        pointerStack.pop();
 
                     break;
                 }

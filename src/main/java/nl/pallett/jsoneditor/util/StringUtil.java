@@ -2,6 +2,10 @@ package nl.pallett.jsoneditor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
+import java.util.Optional;
 import nl.pallett.jsoneditor.model.DocumentType;
 import org.jspecify.annotations.Nullable;
 import org.snakeyaml.engine.v2.api.DumpSettings;
@@ -11,10 +15,6 @@ import org.snakeyaml.engine.v2.api.lowlevel.Present;
 import org.snakeyaml.engine.v2.api.lowlevel.Serialize;
 import org.snakeyaml.engine.v2.events.Event;
 import org.snakeyaml.engine.v2.nodes.Node;
-
-import java.io.StringReader;
-import java.util.List;
-import java.util.Optional;
 
 public class StringUtil {
     private StringUtil() {
@@ -30,6 +30,10 @@ public class StringUtil {
     }
 
     public static String formatCode(DocumentType documentType, String content) throws JsonProcessingException {
+        if (content == null || content.isBlank()) {
+            return content;
+        }
+
         if (documentType == DocumentType.YAML) {
             return formatYaml(content);
         } else {
@@ -75,5 +79,32 @@ public class StringUtil {
 
         ObjectMapper objectMapper = ObjectMapperUtil.getInstance(documentType);
         return objectMapper.writeValueAsString(objectTree);
+    }
+
+    public static @Nullable DocumentType detectFormat(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return null;
+        }
+
+        String trimmed = content.trim();
+
+        // Quick Check: JSON usually starts with { or [
+        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+                ObjectMapperUtil.getJsonInstance().readTree(trimmed);
+                return DocumentType.JSON;
+            } catch (IOException e) {
+                // Not valid JSON, fall through to YAML check
+            }
+        }
+
+        // Try YAML
+        try {
+            ObjectMapperUtil.getYamlInstance().readTree(trimmed);
+            // Since YAML is so permissive, we check if it's more than just a plain string
+            return (trimmed.contains(":") || trimmed.startsWith("-")) ? DocumentType.YAML : null;
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

@@ -1,9 +1,8 @@
 package nl.pallett.jsoneditor.ui.editor.tree;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import nl.pallett.jsoneditor.ast.AstNode;
 import org.jspecify.annotations.Nullable;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 public class TreeBuilder {
 
@@ -72,7 +71,6 @@ public class TreeBuilder {
             }
         }
 
-        //item.setExpanded(true);
         return item;
     }
 

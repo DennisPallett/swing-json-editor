@@ -10,6 +10,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 public class TreePanel extends JPanel implements TreePanelView {
     private final EditorDocument editorDocument;
@@ -93,10 +96,71 @@ public class TreePanel extends JPanel implements TreePanelView {
     private void refreshTree() {
         AstNode astTree = editorDocument.getAstTree();
         if (astTree != null) {
+            List<List<String>> expandedNodes = captureExpandedNodes();
+
             DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree);
             tree.setModel(new DefaultTreeModel(newRoot));
+            tree.setRootVisible(false);
+
+            restoreExpandedNodes(expandedNodes);
 
             astIntervalIndex = new AstIntervalIndex(newRoot);
         }
+    }
+
+    private void restoreExpandedNodes(List<List<String>> expandedNodes) {
+        for (List<String> jsonPath : expandedNodes) {
+            TreePath newPath = findPathByJsonPath(tree, jsonPath);
+            if (newPath != null) {
+                tree.expandPath(newPath);
+            }
+        }
+    }
+
+    private TreePath findPathByJsonPath(JTree tree, List<String> jsonPath) {
+        Object root = tree.getModel().getRoot();
+        TreePath path = new TreePath(root);
+
+        // Start from the first ID after root (assuming root is always expanded/same)
+        for (int i = 1; i < jsonPath.size(); i++) {
+            Object currentId = jsonPath.get(i);
+            Object parentNode = path.getLastPathComponent();
+            boolean found = false;
+
+            int childCount = tree.getModel().getChildCount(parentNode);
+            for (int j = 0; j < childCount; j++) {
+                Object childNode = tree.getModel().getChild(parentNode, j);
+                Object childId = ((AstNode)((DefaultMutableTreeNode)childNode).getUserObject()).getPointerAsJsonPath();
+
+                if (childId != null && childId.equals(currentId)) {
+                    path = path.pathByAddingChild(childNode);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return null; // Path no longer exists
+        }
+        return path;
+    }
+
+    private List<List<String>> captureExpandedNodes() {
+        List<List<String>> expandedPaths = new ArrayList<>();
+        Enumeration<TreePath> expanded = tree.getExpandedDescendants(new TreePath(tree.getModel().getRoot()));
+
+        if (expanded != null) {
+            while (expanded.hasMoreElements()) {
+                TreePath path = expanded.nextElement();
+                List<String> idPath = new ArrayList<>();
+                for (Object node : path.getPath()) {
+                    String jsonPath = ((AstNode)((DefaultMutableTreeNode)node).getUserObject()).getPointerAsJsonPath();
+                    if (jsonPath != null) {
+                        idPath.add(jsonPath);
+                    }
+                }
+                expandedPaths.add(idPath);
+            }
+        }
+
+        return expandedPaths;
     }
 }

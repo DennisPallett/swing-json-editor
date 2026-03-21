@@ -8,4 +8,8 @@ public interface CodePanelView {
     void scrollTo(int offset, Runnable runWhenFinished);
     void addCaretListener(CaretPositionListener listener);
     void updateStatusBar(int line, int column);
+
+    void showFindDialog();
+    void showReplaceDialog();
+    void showGotoLineDialog();
 }
