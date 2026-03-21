@@ -1,20 +1,18 @@
 package nl.pallett.jsoneditor.ui.editor.tree;
 
-import java.awt.BorderLayout;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import nl.pallett.jsoneditor.ast.AstNode;
 import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.view.editor.NodeSelectedListener;
 import nl.pallett.jsoneditor.view.editor.TreePanelView;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 public class TreePanel extends JPanel implements TreePanelView {
     private final EditorDocument editorDocument;
@@ -102,6 +100,7 @@ public class TreePanel extends JPanel implements TreePanelView {
 
             DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree);
             tree.setModel(new DefaultTreeModel(newRoot));
+            tree.setRootVisible(false);
 
             restoreExpandedNodes(expandedNodes);
 
@@ -133,7 +132,7 @@ public class TreePanel extends JPanel implements TreePanelView {
                 Object childNode = tree.getModel().getChild(parentNode, j);
                 Object childId = ((AstNode)((DefaultMutableTreeNode)childNode).getUserObject()).getPointerAsJsonPath();
 
-                if (childId.equals(currentId)) {
+                if (childId != null && childId.equals(currentId)) {
                     path = path.pathByAddingChild(childNode);
                     found = true;
                     break;
@@ -153,7 +152,10 @@ public class TreePanel extends JPanel implements TreePanelView {
                 TreePath path = expanded.nextElement();
                 List<String> idPath = new ArrayList<>();
                 for (Object node : path.getPath()) {
-                    idPath.add(((AstNode)((DefaultMutableTreeNode)node).getUserObject()).getPointerAsJsonPath());
+                    String jsonPath = ((AstNode)((DefaultMutableTreeNode)node).getUserObject()).getPointerAsJsonPath();
+                    if (jsonPath != null) {
+                        idPath.add(jsonPath);
+                    }
                 }
                 expandedPaths.add(idPath);
             }

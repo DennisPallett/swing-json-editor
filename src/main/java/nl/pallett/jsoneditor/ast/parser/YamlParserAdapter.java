@@ -1,19 +1,11 @@
 package nl.pallett.jsoneditor.ast.parser;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Optional;
 import nl.pallett.jsoneditor.ast.ArrayIndexPointer;
 import nl.pallett.jsoneditor.ast.AstNode;
 import nl.pallett.jsoneditor.ast.FieldPointer;
 import nl.pallett.jsoneditor.ast.PointerType;
 import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.events.AliasEvent;
-import org.snakeyaml.engine.v2.events.CommentEvent;
-import org.snakeyaml.engine.v2.events.Event;
-import org.snakeyaml.engine.v2.events.MappingStartEvent;
-import org.snakeyaml.engine.v2.events.ScalarEvent;
-import org.snakeyaml.engine.v2.events.SequenceStartEvent;
+import org.snakeyaml.engine.v2.events.*;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.parser.Parser;
 import org.snakeyaml.engine.v2.parser.ParserImpl;
@@ -22,6 +14,10 @@ import org.snakeyaml.engine.v2.scanner.StreamReader;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.resolver.Resolver;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Optional;
 
 public class YamlParserAdapter implements FormatParser {
     private final LoadSettings settings = LoadSettings.builder().setParseComments(true).build();
@@ -51,7 +47,8 @@ public class YamlParserAdapter implements FormatParser {
 
         pointerStack.push(new FieldPointer("$"));
 
-        AstNode root = null;
+        AstNode root = new AstNode(AstNode.Type.DUMMY_ROOT, null, null);
+        stack.push(root);
 
         while (parser.hasNext()) {
 
@@ -73,8 +70,8 @@ public class YamlParserAdapter implements FormatParser {
                     attachToParent(doc);
                     stack.push(doc);
 
-                    if (root == null)
-                        root = doc;
+                    //if (root == null)
+                    //    root = doc;
 
                     break;
                 }

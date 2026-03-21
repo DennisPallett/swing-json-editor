@@ -1,11 +1,6 @@
 package nl.pallett.jsoneditor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import nl.pallett.jsoneditor.ast.AstConverter;
 import nl.pallett.jsoneditor.ast.AstNode;
 import nl.pallett.jsoneditor.ast.parser.FormatParser;
@@ -15,6 +10,12 @@ import nl.pallett.jsoneditor.util.FileUtil;
 import nl.pallett.jsoneditor.util.HashUtil;
 import nl.pallett.jsoneditor.util.StringUtil;
 import org.jspecify.annotations.Nullable;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class EditorDocument {
     public enum ContentsSource {
@@ -240,6 +241,7 @@ public class EditorDocument {
             setIsValid(true, null);
         } catch (Exception e) {
             setIsValid(false, e);
+            e.printStackTrace(); // TODO: add as debug logging
         }
     }
 

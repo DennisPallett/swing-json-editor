@@ -21,6 +21,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class CodePanel extends JPanel implements CodePanelView, SearchListener {
     private final EditorDocument editorDocument;
@@ -61,7 +63,14 @@ public class CodePanel extends JPanel implements CodePanelView, SearchListener {
         replaceDialog = new ReplaceDialog((JFrame)SwingUtilities.getWindowAncestor(this), this);
         SearchContext context = findDialog.getSearchContext();
         replaceDialog.setSearchContext(context);
-        
+
+        findDialog.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                textArea.clearMarkAllHighlights();
+                statusBar.updateStatusBar("");
+            }
+        });
 
         initModelListener();
         initChangeListener();
