@@ -193,6 +193,10 @@ public class AstNode {
         return this.pointer != null && !this.pointer.isEmpty();
     }
 
+    public boolean hasChildren() {
+        return !this.children.isEmpty();
+    }
+
     public @Nullable String getPointerAsJsonPath() {
         if (getType() == Type.DUMMY_ROOT) {
             return "DUMMY_ROOT";
