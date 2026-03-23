@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [24](https://github.com/DennisPallett/swing-json-editor/issues/24) Added find/replace/goto line functionality
 - Tree state is restored after editing JSON/YAML
 
+### Changed
+- [28](https://github.com/DennisPallett/swing-json-editor/issues/28) Improved tab titles
+
 ### Fixed
 - [27](https://github.com/DennisPallett/swing-json-editor/issues/27) Improved save/save-as menu item
 - Auto-detecting formats is improved
