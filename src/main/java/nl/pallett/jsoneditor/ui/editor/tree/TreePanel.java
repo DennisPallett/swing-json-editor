@@ -191,7 +191,7 @@ public class TreePanel extends JPanel implements TreePanelView {
                 AstNode astNode = (AstNode) node.getUserObject();
 
                 // You can customize menu based on node here
-                new TreePopupMenu(editorDocument, astNode).show(tree, e.getX(), e.getY());
+                new TreePopupMenu(editorDocument, astNode, node, tree).show(tree, e.getX(), e.getY());
             }
         }
     }
