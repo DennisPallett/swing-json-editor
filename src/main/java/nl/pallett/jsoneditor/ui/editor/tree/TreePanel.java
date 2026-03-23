@@ -10,6 +10,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -42,6 +44,18 @@ public class TreePanel extends JPanel implements TreePanelView {
         // Put the tree inside a scroll pane
         JScrollPane scrollPane = new JScrollPane(tree);
         add (scrollPane);
+
+        tree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                showPopupMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                showPopupMenu(e);
+            }
+        });
 
         addAstListener();
     }
@@ -162,5 +176,23 @@ public class TreePanel extends JPanel implements TreePanelView {
         }
 
         return expandedPaths;
+    }
+
+    private void showPopupMenu(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            int row = tree.getRowForLocation(e.getX(), e.getY());
+            TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+
+            if (row != -1) {
+                tree.setSelectionPath(path); // select the node
+
+                // get the node
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                AstNode astNode = (AstNode) node.getUserObject();
+
+                // You can customize menu based on node here
+                new TreePopupMenu(editorDocument, astNode, node, tree).show(tree, e.getX(), e.getY());
+            }
+        }
     }
 }
