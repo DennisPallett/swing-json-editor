@@ -18,8 +18,7 @@ public class SaveAction extends AbstractActionWithState {
     @Override
     public void updateState(@Nullable EditorPanelView editorPanel) {
         setEnabled(editorPanel != null
-            && editorPanel.getEditorDocument() != null
-            && editorPanel.getEditorDocument().getFilePath() != null);
+            && editorPanel.getEditorDocument() != null);
     }
 
     @Override
