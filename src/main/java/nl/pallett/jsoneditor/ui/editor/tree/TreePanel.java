@@ -2,6 +2,7 @@ package nl.pallett.jsoneditor.ui.editor.tree;
 
 import nl.pallett.jsoneditor.ast.AstNode;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.ui.editor.tree.toolbar.TreeToolbar;
 import nl.pallett.jsoneditor.view.editor.NodeSelectedListener;
 import nl.pallett.jsoneditor.view.editor.TreePanelView;
 
@@ -30,6 +31,9 @@ public class TreePanel extends JPanel implements TreePanelView {
 
         setLayout(new BorderLayout());
 
+        TreeToolbar toolbar = new TreeToolbar();
+        add(toolbar, BorderLayout.NORTH);
+
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("$");
         tree = new JTree(root);
         tree.setRootVisible(false);
@@ -43,7 +47,7 @@ public class TreePanel extends JPanel implements TreePanelView {
 
         // Put the tree inside a scroll pane
         JScrollPane scrollPane = new JScrollPane(tree);
-        add (scrollPane);
+        add (scrollPane, BorderLayout.CENTER);
 
         tree.addMouseListener(new MouseAdapter() {
             @Override

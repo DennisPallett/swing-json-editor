@@ -79,6 +79,27 @@
         <artifactId>logback-classic</artifactId>
         <version>1.5.32</version>
       </dependency>
+
+      <!-- Ikonli core -->
+      <dependency>
+        <groupId>org.kordamp.ikonli</groupId>
+        <artifactId>ikonli-core</artifactId>
+        <version>12.3.1</version>
+      </dependency>
+
+      <!-- FontAwesome pack -->
+      <dependency>
+        <groupId>org.kordamp.ikonli</groupId>
+        <artifactId>ikonli-fontawesome5-pack</artifactId>
+        <version>12.3.1</version>
+      </dependency>
+
+      <!-- Swing support -->
+      <dependency>
+        <groupId>org.kordamp.ikonli</groupId>
+        <artifactId>ikonli-swing</artifactId>
+        <version>12.3.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -123,6 +144,24 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
+    </dependency>
+
+    <!-- Ikonli core -->
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-core</artifactId>
+    </dependency>
+
+    <!-- FontAwesome pack -->
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-fontawesome5-pack</artifactId>
+    </dependency>
+
+    <!-- Swing support -->
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-swing</artifactId>
     </dependency>
 
     <dependency>

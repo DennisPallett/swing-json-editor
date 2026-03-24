@@ -4,6 +4,7 @@ import nl.pallett.jsoneditor.model.DocumentType;
 import nl.pallett.jsoneditor.model.EditorDocument;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class CodeToolBar extends JToolBar {
     private final EditorDocument editorDocument;
@@ -18,7 +19,9 @@ public class CodeToolBar extends JToolBar {
         setFloatable(false);
 
         jsonButton = new JToggleButton("JSON");
+        jsonButton.setMargin(new Insets(5, 5, 5, 5));
         yamlButton = new JToggleButton("YAML");
+        yamlButton.setMargin(new Insets(5, 5, 5, 5));
 
         setSelectedMode();
 
