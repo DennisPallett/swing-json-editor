@@ -2,8 +2,11 @@ package nl.pallett.jsoneditor.ui.editor.tree;
 
 import nl.pallett.jsoneditor.ast.AstNode;
 import nl.pallett.jsoneditor.model.EditorDocument;
+import nl.pallett.jsoneditor.ui.editor.tree.toolbar.TreeToolbar;
 import nl.pallett.jsoneditor.view.editor.NodeSelectedListener;
 import nl.pallett.jsoneditor.view.editor.TreePanelView;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,12 +26,17 @@ public class TreePanel extends JPanel implements TreePanelView {
 
     private final JTree tree;
 
-    private AstIntervalIndex astIntervalIndex = null;
+    private @Nullable AstIntervalIndex astIntervalIndex = null;
+
+    private @NonNull SortState sortState = SortState.NONE;
 
     public TreePanel (EditorDocument editorDocument) {
         this.editorDocument = editorDocument;
 
         setLayout(new BorderLayout());
+
+        TreeToolbar toolbar = new TreeToolbar(this);
+        add(toolbar, BorderLayout.NORTH);
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("$");
         tree = new JTree(root);
@@ -43,7 +51,7 @@ public class TreePanel extends JPanel implements TreePanelView {
 
         // Put the tree inside a scroll pane
         JScrollPane scrollPane = new JScrollPane(tree);
-        add (scrollPane);
+        add (scrollPane, BorderLayout.CENTER);
 
         tree.addMouseListener(new MouseAdapter() {
             @Override
@@ -85,6 +93,11 @@ public class TreePanel extends JPanel implements TreePanelView {
         }
     }
 
+    public void setSortState(SortState sortState) {
+        this.sortState = sortState;
+        this.refreshTree();
+    }
+
     public void selectAndReveal(AstNode node) {
         DefaultMutableTreeNode item = astIntervalIndex.getTreeItemForNode(node);
         if (item == null) {
@@ -112,7 +125,7 @@ public class TreePanel extends JPanel implements TreePanelView {
         if (astTree != null) {
             List<List<String>> expandedNodes = captureExpandedNodes();
 
-            DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree);
+            DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree, sortState);
             tree.setModel(new DefaultTreeModel(newRoot));
             tree.setRootVisible(false);
 

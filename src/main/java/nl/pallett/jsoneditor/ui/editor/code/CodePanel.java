@@ -51,6 +51,8 @@ public class CodePanel extends JPanel implements CodePanelView, SearchListener {
         textArea = new RSyntaxTextArea(editorDocument.getContents(), 20, 60);
         textArea.setCodeFoldingEnabled(true);
         setSyntaxStyle();
+        textArea.setTabsEmulated(true);
+        textArea.setTabSize(2);
         RTextScrollPane scrollPane = new RTextScrollPane(textArea);
 
         add(scrollPane, BorderLayout.CENTER);

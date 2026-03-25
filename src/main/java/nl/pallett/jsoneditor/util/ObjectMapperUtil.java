@@ -12,15 +12,14 @@ public class ObjectMapperUtil {
     static {
         objectMapperJson = new ObjectMapper();
         DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
-                .withArrayIndenter(new DefaultIndenter("    ", "\n"))   // 4 spaces + newline
-                .withObjectIndenter(new DefaultIndenter("    ", "\n"));
+                .withArrayIndenter(new DefaultIndenter("  ", "\n"))   // 4 spaces + newline
+                .withObjectIndenter(new DefaultIndenter("  ", "\n"));
         objectMapperJson.setDefaultPrettyPrinter(printer);
     }
 
     private static ObjectMapper objectMapperYaml;
     static {
         objectMapperYaml = new ObjectMapper(new YAMLFactory());
-        // TODO: set pretty printer of yaml
     }
 
     public static ObjectMapper getJsonInstance() {
