@@ -1,17 +1,21 @@
 package nl.pallett.jsoneditor.ui.editor.tree.toolbar;
 
+import nl.pallett.jsoneditor.ui.editor.tree.SortState;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SortButton extends JButton {
     private SortState state = SortState.NONE;
 
-    private final Icon alphaUpIcon = FontIcon.of(FontAwesomeSolid.SORT_ALPHA_UP, 24);
-    private final Icon alphaDownIcon = FontIcon.of(FontAwesomeSolid.SORT_ALPHA_DOWN, 24);
-    //private final Icon sortIcon = FontIcon.of(FontAwesomeSolid.SORT, 24);
+    private final Icon alphaUpIcon = FontIcon.of(FontAwesomeSolid.SORT_ALPHA_UP, 16);
+    private final Icon alphaDownIcon = FontIcon.of(FontAwesomeSolid.SORT_ALPHA_DOWN, 16);
+
+    private final List<SortStateChangedListener> sortStateChangedListenerList = new ArrayList<>();
 
     public SortButton() {
         setMargin(new Insets(5, 5, 5, 5));
@@ -24,7 +28,12 @@ public class SortButton extends JButton {
                 case DESCENDING -> SortState.NONE;
             };
             updateUIState();
+            sortStateChangedListenerList.forEach(l -> l.onSortStateChanged(state));
         });
+    }
+
+    public void addOnSortChangeListener(SortStateChangedListener listener) {
+        sortStateChangedListenerList.add(listener);
     }
 
     private void updateUIState() {

@@ -5,6 +5,8 @@ import nl.pallett.jsoneditor.model.EditorDocument;
 import nl.pallett.jsoneditor.ui.editor.tree.toolbar.TreeToolbar;
 import nl.pallett.jsoneditor.view.editor.NodeSelectedListener;
 import nl.pallett.jsoneditor.view.editor.TreePanelView;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -24,14 +26,16 @@ public class TreePanel extends JPanel implements TreePanelView {
 
     private final JTree tree;
 
-    private AstIntervalIndex astIntervalIndex = null;
+    private @Nullable AstIntervalIndex astIntervalIndex = null;
+
+    private @NonNull SortState sortState = SortState.NONE;
 
     public TreePanel (EditorDocument editorDocument) {
         this.editorDocument = editorDocument;
 
         setLayout(new BorderLayout());
 
-        TreeToolbar toolbar = new TreeToolbar();
+        TreeToolbar toolbar = new TreeToolbar(this);
         add(toolbar, BorderLayout.NORTH);
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("$");
@@ -89,6 +93,11 @@ public class TreePanel extends JPanel implements TreePanelView {
         }
     }
 
+    public void setSortState(SortState sortState) {
+        this.sortState = sortState;
+        this.refreshTree();
+    }
+
     public void selectAndReveal(AstNode node) {
         DefaultMutableTreeNode item = astIntervalIndex.getTreeItemForNode(node);
         if (item == null) {
@@ -114,9 +123,10 @@ public class TreePanel extends JPanel implements TreePanelView {
     private void refreshTree() {
         AstNode astTree = editorDocument.getAstTree();
         if (astTree != null) {
+            System.out.println("Showing tree with sort state:" + sortState);
             List<List<String>> expandedNodes = captureExpandedNodes();
 
-            DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree);
+            DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree, sortState);
             tree.setModel(new DefaultTreeModel(newRoot));
             tree.setRootVisible(false);
 

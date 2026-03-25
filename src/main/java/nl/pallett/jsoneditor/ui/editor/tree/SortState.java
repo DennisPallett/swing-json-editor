@@ -1,4 +1,4 @@
-package nl.pallett.jsoneditor.ui.editor.tree.toolbar;
+package nl.pallett.jsoneditor.ui.editor.tree;
 
 public enum SortState {
     NONE,

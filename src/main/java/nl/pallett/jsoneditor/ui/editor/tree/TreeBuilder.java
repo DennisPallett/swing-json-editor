@@ -1,16 +1,17 @@
 package nl.pallett.jsoneditor.ui.editor.tree;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import nl.pallett.jsoneditor.ast.AstNode;
 import org.jspecify.annotations.Nullable;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 public class TreeBuilder {
 
-    public DefaultMutableTreeNode buildTree(AstNode root) {
-        return buildFlat(root);
+    public DefaultMutableTreeNode buildTree(AstNode root, SortState sortState) {
+        return buildFlat(root, sortState);
     }
 
-    private @Nullable DefaultMutableTreeNode buildFlat(AstNode node) {
+    private @Nullable DefaultMutableTreeNode buildFlat(AstNode node, SortState sortState) {
 
         DefaultMutableTreeNode item;
 
@@ -65,7 +66,7 @@ public class TreeBuilder {
                 child.getType() == AstNode.Type.VALUE)
                 continue;
 
-            DefaultMutableTreeNode childTreeItem = buildFlat(child);
+            DefaultMutableTreeNode childTreeItem = buildFlat(child, sortState);
             if (childTreeItem != null) {
                 item.add(childTreeItem);
             }
