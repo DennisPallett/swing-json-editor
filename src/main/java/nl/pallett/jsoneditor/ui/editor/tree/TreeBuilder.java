@@ -4,6 +4,8 @@ import nl.pallett.jsoneditor.ast.AstNode;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TreeBuilder {
 
@@ -59,6 +61,8 @@ public class TreeBuilder {
             item = new DefaultMutableTreeNode(node);
         }
 
+        List<DefaultMutableTreeNode> children = new ArrayList<>();
+
         for (AstNode child : node.getChildren()) {
 
             // skip child if we already merged it
@@ -68,9 +72,28 @@ public class TreeBuilder {
 
             DefaultMutableTreeNode childTreeItem = buildFlat(child, sortState);
             if (childTreeItem != null) {
-                item.add(childTreeItem);
+                children.add(childTreeItem);
             }
         }
+
+        if (node.getType() == AstNode.Type.OBJECT && sortState != SortState.NONE) {
+            children.sort((a, b) -> {
+                    AstNode nodeA = (AstNode) a.getUserObject();
+                    AstNode nodeB = (AstNode) b.getUserObject();
+
+                    String keyA = nodeA.getKey() != null ? nodeA.getKey() : "";
+                    String keyB = nodeB.getKey() != null ? nodeB.getKey() : "";
+
+                    int ret = keyA.compareTo(keyB);
+                    if (sortState == SortState.DESCENDING) {
+                        ret = -ret;
+                    }
+                    return ret;
+                }
+            );
+        }
+
+        children.forEach(item::add);
 
         return item;
     }

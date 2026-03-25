@@ -123,7 +123,6 @@ public class TreePanel extends JPanel implements TreePanelView {
     private void refreshTree() {
         AstNode astTree = editorDocument.getAstTree();
         if (astTree != null) {
-            System.out.println("Showing tree with sort state:" + sortState);
             List<List<String>> expandedNodes = captureExpandedNodes();
 
             DefaultMutableTreeNode newRoot = treeBuilder.buildTree(astTree, sortState);
