@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.2.0] UNRELEASED
 ### Added
+- [19](https://github.com/DennisPallett/swing-json-editor/issues/19) Added tree toolbar + add tree sorting
 
 ## [1.1.0] 2026-03-23
 ### Added
