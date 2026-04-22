@@ -111,7 +111,7 @@ public class EditorDocument {
             String converted = StringUtil.convertOjectTreeToString(astConverter.toObjectTree(astTree), convertTo);
             return StringUtil.formatCode(documentType, converted);
         } catch (JsonProcessingException e) {
-            System.err.println(e.getStackTrace());
+            System.err.println(e);
             return null;
         }
     }

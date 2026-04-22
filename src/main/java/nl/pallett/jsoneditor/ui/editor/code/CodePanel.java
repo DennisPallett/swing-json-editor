@@ -178,13 +178,18 @@ public class CodePanel extends JPanel implements CodePanelView, SearchListener {
             }
 
             if (Property.IS_VALID.name().equals(evt.getPropertyName())) {
-                statusBar.updateStatusBar(editorDocument.isValid(), editorDocument.getParseException());
+                updateValidationStatus();
             }
 
             if (Property.DOCUMENT_TYPE.name().equals(evt.getPropertyName())) {
                 setSyntaxStyle();
+                updateValidationStatus();
             }
         });
+    }
+
+    private void updateValidationStatus() {
+        statusBar.updateStatusBar(editorDocument.isValid(), editorDocument.getParseException());
     }
 
     private void onTextChanged () {

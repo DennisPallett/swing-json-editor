@@ -11,13 +11,26 @@ public class AstConverter {
             return null;
         }
 
-        Object root = buildNode(astTree);
-        return root;
+        return buildNode(astTree);
     }
 
-    private Object buildNode(AstNode astNode) {
+    private @Nullable Object buildNode(@Nullable AstNode astNode) {
+        if (astNode == null) {
+            return null;
+        }
+
         Object result = null;
         switch (astNode.getType()) {
+            case DUMMY_ROOT:
+                result = buildNode(
+                    astNode.getChildren().stream()
+                    .filter(n -> n.getType() == AstNode.Type.OBJECT
+                        || n.getType() == AstNode.Type.ARRAY
+                        || n.getType() == AstNode.Type.DOCUMENT)
+                    .findFirst()
+                    .orElse(null)
+                );
+                break;
             case OBJECT: {
                 Map<String, Object> map = new HashMap<>();
                 astNode.getChildren().stream()
