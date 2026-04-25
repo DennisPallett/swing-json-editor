@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.3.0] UNRELEASED
 ### Added
+- [11](https://github.com/DennisPallett/swing-json-editor/issues/11) Add the ability to increase/decrease font size
 
 ### Fixed
 

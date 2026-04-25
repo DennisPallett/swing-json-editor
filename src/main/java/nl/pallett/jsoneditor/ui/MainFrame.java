@@ -4,6 +4,7 @@ import nl.pallett.jsoneditor.controller.EditorManager;
 import nl.pallett.jsoneditor.menu.EditMenu;
 import nl.pallett.jsoneditor.menu.FileMenu;
 import nl.pallett.jsoneditor.menu.FindMenu;
+import nl.pallett.jsoneditor.menu.ViewMenu;
 import nl.pallett.jsoneditor.ui.tabs.EditorTabbedPane;
 import nl.pallett.jsoneditor.view.MainView;
 import org.jspecify.annotations.Nullable;
@@ -40,6 +41,7 @@ public class MainFrame extends JFrame implements MainView {
         JMenuBar bar = new JMenuBar();
         bar.add(new FileMenu(editorManager));
         bar.add(new EditMenu(editorManager));
+        bar.add(new ViewMenu(editorManager.getActionManager()));
         bar.add(new FindMenu(editorManager.getActionManager()));
         return bar;
     }

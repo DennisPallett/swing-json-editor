@@ -1,6 +1,7 @@
 package nl.pallett.jsoneditor.view.editor;
 
 public interface CodePanelView {
+    void setFontSize(int size);
     void undo();
     void redo();
     boolean canUndo();
