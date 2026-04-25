@@ -141,6 +141,11 @@ public class CodePanel extends JPanel implements CodePanelView, SearchListener {
     }
 
     @Override
+    public void setFontSize(int size) {
+        textArea.setFont(textArea.getFont().deriveFont((float) size));
+    }
+
+    @Override
     public void undo() {
         textArea.undoLastAction();
     }

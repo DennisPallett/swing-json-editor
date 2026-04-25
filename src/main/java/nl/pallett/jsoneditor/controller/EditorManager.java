@@ -31,6 +31,9 @@ public class EditorManager {
 
     private final Map<EditorDocument, EditorPanelView> openDocuments = new HashMap<>();
 
+    private static final int DEFAULT_FONT_SIZE = 13;
+    private int currentFontSize = DEFAULT_FONT_SIZE;
+
     public EditorManager(MainView mainView, EditorTabbedView tabbedView) {
         this.tabbedView = tabbedView;
         this.mainView = mainView;
@@ -152,8 +155,28 @@ public class EditorManager {
         return tabbedView.getActiveEditorPanel();
     }
 
+    public void increaseFontSize() {
+        applyFontSize(++currentFontSize);
+    }
+
+    public void decreaseFontSize() {
+        if (currentFontSize > 6) {
+            applyFontSize(--currentFontSize);
+        }
+    }
+
+    public void resetFontSize() {
+        currentFontSize = DEFAULT_FONT_SIZE;
+        applyFontSize(currentFontSize);
+    }
+
+    private void applyFontSize(int size) {
+        openDocuments.values().forEach(ep -> ep.getCodePanel().setFontSize(size));
+    }
+
     private void addDocument(EditorDocument document, EditorPanelView editorPanelView) {
         openDocuments.put(document, editorPanelView);
+        editorPanelView.getCodePanel().setFontSize(currentFontSize);
 
         document.addPropertyChangeListener(evt -> {
             if (EditorDocument.Property.CONTENTS.name().equals(evt.getPropertyName())) {
