@@ -1,9 +1,13 @@
 package nl.pallett.jsoneditor.util;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Optional;
 import nl.pallett.jsoneditor.model.DocumentType;
@@ -42,10 +46,21 @@ public class StringUtil {
     }
 
     public static String formatJson(String jsonString) throws JsonProcessingException {
-        var objectMapper = ObjectMapperUtil.getJsonInstance();
-        Object object = objectMapper.readValue(jsonString, Object.class);
-        return objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(object);
+        // Stream tokens instead of binding to a Map, so duplicate keys, key order and number literals are kept as-is
+        ObjectMapper objectMapper = ObjectMapperUtil.getJsonInstance();
+        StringWriter writer = new StringWriter();
+        try (JsonParser parser = objectMapper.createParser(jsonString);
+             JsonGenerator generator = objectMapper.writerWithDefaultPrettyPrinter().createGenerator(writer)) {
+            while (parser.nextToken() != null) {
+                generator.copyCurrentStructure(parser);
+            }
+        } catch (JsonProcessingException e) {
+            throw e;
+        } catch (IOException e) {
+            // StringWriter does not perform real I/O, so this cannot happen in practice
+            throw new UncheckedIOException(e);
+        }
+        return writer.toString();
     }
 
     public static String formatYaml(String yamlString) {
