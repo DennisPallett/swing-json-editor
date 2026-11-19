@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [11](https://github.com/DennisPallett/swing-json-editor/issues/11) Add the ability to increase/decrease font size
 
 ### Fixed
+- [37](https://github.com/DennisPallett/swing-json-editor/issues/37) Prevent duplicate keys from disappearing when formatting JSON
 
 ## [1.2.0] 2026-04-22
 ### Added
